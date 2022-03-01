@@ -4,24 +4,19 @@ namespace Minibank.Core.Services
 {
     public class CurrencyConverter : ICurrencyConverter
     {
+        private readonly ICurrencyRate currencyRate;
+
         public CurrencyConverter(ICurrencyRate currencyRate)
         {
-            _currencyRate = currencyRate;
+            this.currencyRate = currencyRate;
         }
   
         public int ConvertRubles(int amount, string currencyCode)
         {
-            if (amount < 0 || CheckCodeIsValid(currencyCode))
-                throw new UserFriendlyException("Friendly error message");
+            if (amount < 0 || string.IsNullOrWhiteSpace(currencyCode))
+                throw new InvalidCurrencyArgsException("Amount is invalid or currency code is empty");
             else
-                return (int)(amount / _currencyRate.GetCurrencyRate(currencyCode));
+                return (int)(amount / currencyRate.GetCurrencyRate(currencyCode));
         }
-
-        private static bool CheckCodeIsValid(string currencyCode)
-        {
-            return currencyCode == "" || string.IsNullOrWhiteSpace(currencyCode);
-        }
-
-        private readonly ICurrencyRate _currencyRate;
     }
 }

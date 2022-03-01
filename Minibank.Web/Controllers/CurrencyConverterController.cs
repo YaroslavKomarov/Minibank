@@ -7,17 +7,17 @@ namespace Minibank.Web.Controllers
     [Route("[controller]")]
     public class CurrencyConverterController : Controller
     {
+        private readonly ICurrencyConverter converter;
+
         public CurrencyConverterController(ICurrencyConverter converter)
         {
-            _converter = converter;
+            this.converter = converter;
         }
 
         [HttpGet]
         public double GetConvertCurrency(int amount, string currencyCode)
         {
-            return _converter.ConvertRubles(amount, currencyCode);
+            return converter.ConvertRubles(amount, currencyCode);
         }
-
-        private readonly ICurrencyConverter _converter;
     }
 }

@@ -5,12 +5,13 @@ namespace Minibank.Data.Services
 {
     public class CurrencyRate : ICurrencyRate
     {
+        private static readonly Random random = new Random();
+
         public double GetCurrencyRate(string currencyCode)
         {
             var min = 1;
             var max = 100;
-            var rnd = new Random();
-            return rnd.NextDouble() * (max - min);
+            return random.NextDouble() * (max - min);
         }
     }
 }
