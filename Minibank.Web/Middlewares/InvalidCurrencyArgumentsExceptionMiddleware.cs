@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace Minibank.Web.Middlewares
 {
-    public class InvalidCurrencyArgsExceptionMiddleware
+    public class InvalidCurrencyArgumentsExceptionMiddleware
     {
         public readonly RequestDelegate _next;
 
-        public InvalidCurrencyArgsExceptionMiddleware(RequestDelegate next)
+        public InvalidCurrencyArgumentsExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
         }
@@ -19,7 +19,7 @@ namespace Minibank.Web.Middlewares
             {
                 await _next(httpContext);
             }
-            catch (InvalidCurrencyArgsException ex)
+            catch (InvalidCurrencyArgumentsException ex)
             {
                 httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await httpContext.Response.WriteAsJsonAsync(new { Message = ex.Message });

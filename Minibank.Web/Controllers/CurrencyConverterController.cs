@@ -15,7 +15,7 @@ namespace Minibank.Web.Controllers
         }
 
         [HttpGet]
-        public double GetConvertCurrency(int amount, string currencyCode)
+        public decimal GetConvertCurrency(int amount, string currencyCode)
         {
             return converter.ConvertRubles(amount, currencyCode);
         }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 
 namespace Minibank.Core.Services
 {
@@ -11,12 +11,22 @@ namespace Minibank.Core.Services
             this.currencyRate = currencyRate;
         }
   
-        public int ConvertRubles(int amount, string currencyCode)
+        public decimal ConvertRubles(int amount, string currencyCode)
         {
             if (amount < 0 || string.IsNullOrWhiteSpace(currencyCode))
-                throw new InvalidCurrencyArgsException("Amount is invalid or currency code is empty");
+            {
+                throw new InvalidCurrencyArgumentsException("Сумма недействительна или валютный код пуст");
+            }
             else
-                return (int)(amount / currencyRate.GetCurrencyRate(currencyCode));
+            {
+                var currencyAmount = amount / currencyRate.GetCurrencyRate(currencyCode);
+                return RoundValueToHundredths(currencyAmount);
+            }
+        }
+
+        public static decimal RoundValueToHundredths(decimal value)
+        {
+            return Math.Round(value, 2);
         }
     }
 }

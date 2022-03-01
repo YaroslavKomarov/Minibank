@@ -7,11 +7,12 @@ namespace Minibank.Data.Services
     {
         private static readonly Random random = new Random();
 
-        public double GetCurrencyRate(string currencyCode)
+        public decimal GetCurrencyRate(string currencyCode)
         {
             var min = 1;
             var max = 100;
-            return random.NextDouble() * (max - min);
+            var currencyRate = (decimal)random.NextDouble() * (max - min);
+            return CurrencyConverter.RoundValueToHundredths(currencyRate);
         }
     }
 }
