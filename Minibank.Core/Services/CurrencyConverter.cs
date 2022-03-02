@@ -11,16 +11,16 @@ namespace Minibank.Core.Services
             this.currencyRate = currencyRate;
         }
   
-        public decimal ConvertRubles(decimal amount, string currencyCode)
+        public decimal ConvertRubles(decimal? amount, string currencyCode)
         {
-            if (amount < 0 || string.IsNullOrWhiteSpace(currencyCode))
+            if (amount == null || amount < 0 || string.IsNullOrWhiteSpace(currencyCode))
             {
                 throw new InvalidCurrencyArgumentsException("Сумма недействительна или валютный код пуст");
             }
             else
             {
                 var currencyAmount = amount / currencyRate.GetCurrencyRate(currencyCode);
-                return Math.Round(currencyAmount, 2);
+                return Math.Round((decimal)currencyAmount, 2);
             }
         }
     }
