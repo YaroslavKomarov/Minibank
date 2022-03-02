@@ -11,7 +11,7 @@ namespace Minibank.Core.Services
             this.currencyRate = currencyRate;
         }
   
-        public decimal ConvertRubles(int amount, string currencyCode)
+        public decimal ConvertRubles(decimal amount, string currencyCode)
         {
             if (amount < 0 || string.IsNullOrWhiteSpace(currencyCode))
             {
@@ -20,13 +20,8 @@ namespace Minibank.Core.Services
             else
             {
                 var currencyAmount = amount / currencyRate.GetCurrencyRate(currencyCode);
-                return RoundValueToHundredths(currencyAmount);
+                return Math.Round(currencyAmount, 2);
             }
-        }
-
-        public static decimal RoundValueToHundredths(decimal value)
-        {
-            return Math.Round(value, 2);
         }
     }
 }

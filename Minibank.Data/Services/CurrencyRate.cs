@@ -11,8 +11,8 @@ namespace Minibank.Data.Services
         {
             var min = 1;
             var max = 100;
-            var currencyRate = (decimal)random.NextDouble() * (max - min);
-            return CurrencyConverter.RoundValueToHundredths(currencyRate);
+            var currencyRate = (decimal)random.NextDouble() * (max - min) + min;
+            return Math.Round(currencyRate, 2);
         }
     }
 }
