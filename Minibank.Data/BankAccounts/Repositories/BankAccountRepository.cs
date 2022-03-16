@@ -31,18 +31,6 @@ namespace Minibank.Data.BankAccounts.Repositories
             };
         }
 
-        public bool DeleteBankAccountById(string id)
-        {
-            var accountModel = bankAccountStorage.FirstOrDefault(it => it.Id == id);
-
-            if (accountModel != null)
-            {
-                return bankAccountStorage.Remove(accountModel);
-            }
-
-            return false;
-        }
-
         public bool ExistBankAccountByUserId(string userId)
         {
             var accountModel = bankAccountStorage.FirstOrDefault(it => it.UserId == userId);
@@ -57,10 +45,33 @@ namespace Minibank.Data.BankAccounts.Repositories
                 Id = Guid.NewGuid().ToString(),
                 UserId = userId,
                 CurrencyCode = currencyCode,
+                OpeningDate = DateTime.Now,
                 Amount = 1000
             };
 
             bankAccountStorage.Add(accountModel);
+        }
+
+        public bool UpdateBankAccount(BankAccount bankAccount)
+        {
+            var oldAccountModel = bankAccountStorage.FirstOrDefault(it => it.Id == bankAccount.Id);
+
+            if (oldAccountModel != null)
+            {
+                bankAccountStorage[bankAccountStorage.IndexOf(oldAccountModel)] = new BankAccountDbModel
+                {
+                    Id = bankAccount.Id,
+                    UserId = bankAccount.UserId,
+                    Amount = bankAccount.Amount,
+                    CurrencyCode = bankAccount.CurrencyCode,
+                    OpeningDate = bankAccount.OpeningDate,
+                    ClosingDate = bankAccount.ClosingDate,
+                    IsClosed = bankAccount.IsClosed
+                };
+                return true;
+            }
+
+            return false;
         }
     }
 }

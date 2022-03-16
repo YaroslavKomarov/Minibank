@@ -54,6 +54,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             }
 
             account.IsClosed = true;
+            accountRepository.UpdateBankAccount(account);
         }
 
         public decimal GetTransferCommission(decimal? amount, string fromAccountId, string toAccountId)
@@ -113,15 +114,17 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             });
         }
 
-        private void WithdrawFundsFromSourceAccount(decimal amount, BankAccount sourceAccount)
+        private void WithdrawFundsFromSourceAccount(decimal amount, BankAccount source)
         {
-            if (sourceAccount.Amount - amount >= 0)
+            if (source.Amount - amount >= 0)
             {
-                sourceAccount.Amount -= amount;
+                source.Amount -= amount;
+                accountRepository.UpdateBankAccount(source);
+                return;
             }
 
             throw new ValidationException(
-                $"Недостаточно средств для осуществления перевода, баланс: {sourceAccount.Amount} {sourceAccount.CurrencyCode}"
+                $"Недостаточно средств для осуществления перевода, баланс: {source.Amount} {source.CurrencyCode}"
             );
         }
         
@@ -135,6 +138,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             var transferAmount = GetMoneyInNewCurrency(amountWithoutCommission, source.CurrencyCode, destination.CurrencyCode);
 
             destination.Amount += transferAmount;
+            accountRepository.UpdateBankAccount(destination);
         }
 
         private decimal GetMoneyInNewCurrency(

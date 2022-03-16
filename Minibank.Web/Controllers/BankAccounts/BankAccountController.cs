@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Minibank.Core.Domains.BankAccounts.Services;
-using System;
 
 namespace Minibank.Web.Controllers.BankAccounts
 {

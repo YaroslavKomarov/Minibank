@@ -35,7 +35,7 @@ namespace Minibank.Data.Users.Repositories
             {
                 Id = userModel.Id,
                 Login = userModel.Login,
-                Email = userModel.Email
+                Email = userModel.Email,
             };
         }
 
