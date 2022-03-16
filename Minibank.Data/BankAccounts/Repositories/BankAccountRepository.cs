@@ -37,35 +37,20 @@ namespace Minibank.Data.BankAccounts.Repositories
 
             if (accountModel != null)
             {
-                bankAccountStorage.Remove(accountModel);
-                return true;
+                return bankAccountStorage.Remove(accountModel);
             }
 
             return false;
         }
 
-        public BankAccount GetBankAccountByUserId(string userId)
+        public bool ExistBankAccountByUserId(string userId)
         {
             var accountModel = bankAccountStorage.FirstOrDefault(it => it.UserId == userId);
 
-            if (accountModel == null)
-            {
-                return null;
-            }
-
-            return new BankAccount
-            {
-                Id = accountModel.Id,
-                UserId = accountModel.UserId,
-                Amount = accountModel.Amount,
-                CurrencyCode = accountModel.CurrencyCode,
-                OpeningDate = accountModel.OpeningDate,
-                ClosingDate = accountModel.ClosingDate,
-                IsClosed = accountModel.IsClosed
-            };
+            return accountModel == null ? false : true;
         }
 
-        public void PostBankAccount(string userId, string currencyCode)
+        public void CreateBankAccount(string userId, string currencyCode)
         {
             var accountModel = new BankAccountDbModel
             {

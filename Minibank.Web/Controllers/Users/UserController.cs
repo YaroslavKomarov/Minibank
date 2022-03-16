@@ -17,9 +17,9 @@ namespace Minibank.Web.Controllers.Users
         }
 
         [HttpPost]
-        public void PostUser(PostUserDto model)
+        public void CreateUser(PostUserDto model)
         {
-            userService.PostUser(new User
+            userService.CreateUser(new User
             {
                 Login = model.Login,
                 Email = model.Email
@@ -33,9 +33,9 @@ namespace Minibank.Web.Controllers.Users
         }
 
         [HttpPut]
-        public void PutUser(UserDto model)
+        public void UpdateUser(UserDto model)
         {
-            userService.PutUser(new User
+            userService.UpdateUser(new User
             {
                 Id = model.Id,
                 Login = model.Login,

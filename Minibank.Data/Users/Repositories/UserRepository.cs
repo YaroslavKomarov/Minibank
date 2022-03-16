@@ -16,8 +16,7 @@ namespace Minibank.Data.Users.Repositories
             
             if (userModel != null)
             {
-                userStorage.Remove(userModel);
-                return true;
+                return userStorage.Remove(userModel);
             }
 
             return false;
@@ -40,7 +39,7 @@ namespace Minibank.Data.Users.Repositories
             };
         }
 
-        public void PostUser(User user)
+        public void CreateUser(User user)
         {
             userStorage.Add(new UserDbModel
             {
@@ -50,7 +49,7 @@ namespace Minibank.Data.Users.Repositories
             });
         }
 
-        public bool PutUser(User user)
+        public bool UpdateUser(User user)
         {
             var oldUserModel = userStorage.FirstOrDefault(it => it.Id == user.Id);
 

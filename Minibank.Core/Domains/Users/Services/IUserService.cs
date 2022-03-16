@@ -4,8 +4,8 @@ namespace Minibank.Core.Domains.Users.Services
 {
     public interface IUserService
     {
-        void PostUser(User user);
+        void CreateUser(User user);
         void DeleteUserById(string id);
-        void PutUser(User user);
+        void UpdateUser(User user);
     }
 }

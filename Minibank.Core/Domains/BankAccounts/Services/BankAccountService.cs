@@ -39,32 +39,34 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             this.converter = converter;
         }
 
-        public void DeleteBankAccountById(string id)
+        public void CloseBankAccountById(string id)
         {
             var account = accountRepository.GetBankAccountById(id);
 
-            if (account == null || account.Amount != 0)
+            if (account == null) 
+            {
+                throw new ValidationException("Аккаунт с переданным идентефикатором не существует");
+            }
+
+            if (account.Amount != 0) 
             {
                 throw new ValidationException("Невозможно удалить аккаунт с ненулевым счетом");
             }
 
-            accountRepository.DeleteBankAccountById(id);
+            account.IsClosed = true;
         }
 
         public decimal GetTransferCommission(decimal? amount, string fromAccountId, string toAccountId)
         {
-            if (amount == null)
-            {
-                throw new ValidationException("Передана пустая сумма");
-            }
-            var validAmount = (decimal)amount;
+            var validAmount = ValidateAmount(amount);
 
-            var sourceAccount = accountRepository.GetBankAccountById(fromAccountId);
-            var destinationAccount = accountRepository.GetBankAccountById(toAccountId);
+            var source = accountRepository.GetBankAccountById(fromAccountId);
+            var destination = accountRepository.GetBankAccountById(toAccountId);
 
-            ValidateTransferAccounts(sourceAccount, destinationAccount);
+            ValidateAccount(source);
+            ValidateAccount(destination);
 
-            if (sourceAccount.UserId != destinationAccount.UserId)
+            if (source.UserId != destination.UserId)
             {
                 var commission = validAmount / 100 * commissionPercentage;
                 return Math.Round(commission, 2);
@@ -73,7 +75,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             return 0;
         }
 
-        public void PostBankAccount(string userId, string currencyCode)
+        public void CreateBankAccount(string userId, string currencyCode)
         {
             var user = userRepository.GetUserById(userId);
 
@@ -87,16 +89,12 @@ namespace Minibank.Core.Domains.BankAccounts.Services
                 throw new ValidationException($"Недопустимый валютный код: {currencyCode}");
             }
 
-            accountRepository.PostBankAccount(userId, currencyCode);
+            accountRepository.CreateBankAccount(userId, currencyCode);
         }
 
-        public void PutFundsTransfer(decimal? amount, string fromAccountId, string toAccountId)
+        public void UpdateFundsTransfer(decimal? amount, string fromAccountId, string toAccountId)
         {
-            if (amount == null)
-            {
-                throw new ValidationException("Передана пустая сумма");
-            }
-            var validAmount = (decimal)amount;
+            var validAmount = ValidateAmount(amount);
 
             var commission = GetTransferCommission(validAmount, fromAccountId, toAccountId);
 
@@ -133,10 +131,10 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             BankAccount source,
             BankAccount destination)
         {
-            var amount = GetMoneyInNewCurrency(initialAmount, source.CurrencyCode, destination.CurrencyCode);
-            var commission = GetMoneyInNewCurrency(initialCommission, source.CurrencyCode, destination.CurrencyCode);
+            var amountWithoutCommission = initialAmount - initialCommission;
+            var transferAmount = GetMoneyInNewCurrency(amountWithoutCommission, source.CurrencyCode, destination.CurrencyCode);
 
-            destination.Amount += amount - commission;
+            destination.Amount += transferAmount;
         }
 
         private decimal GetMoneyInNewCurrency(
@@ -152,17 +150,21 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             return amount;
         }
 
-        private void ValidateTransferAccounts(BankAccount sourceAccount, BankAccount destinationAccount)
+        private void ValidateAccount(BankAccount sourceAccount)
         {
             if (sourceAccount == null)
             {
-                throw new ValidationException("Аккаунт источника с переданным идентефикатором не существует");
+                throw new ValidationException("Аккаунт с переданным идентефикатором не существует");
             }
+        }
 
-            if (destinationAccount == null)
+        private decimal ValidateAmount(decimal? amount)
+        {
+            if (amount == null)
             {
-                throw new ValidationException("Аккаунт назначения с переданным идентефикатором не существует");
+                throw new ValidationException("Передана пустая сумма");
             }
+            return (decimal)amount;
         }
     }
 }

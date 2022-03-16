@@ -15,10 +15,10 @@ namespace Minibank.Web.Controllers.BankAccounts
             accountService = service;
         }
 
-        [HttpDelete]
-        public void DeleteBankAccountById(string id)
+        [HttpPut]
+        public void CloseBankAccountById(string id)
         {
-            accountService.DeleteBankAccountById(id);
+            accountService.CloseBankAccountById(id);
         }
 
         [HttpGet]
@@ -28,15 +28,15 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
 
         [HttpPost]
-        public void PostBankAccount(string userId, string currencyCode)
+        public void CreateBankAccount(string userId, string currencyCode)
         {
-            accountService.PostBankAccount(userId, currencyCode);
+            accountService.CreateBankAccount(userId, currencyCode);
         }
 
         [HttpPut]
-        public void PutTransferFunds(decimal? amount, string fromAccountId, string toAccountId)
+        public void UpdateTransferFunds(decimal? amount, string fromAccountId, string toAccountId)
         {
-            accountService.PutFundsTransfer(amount, fromAccountId, toAccountId);
+            accountService.UpdateFundsTransfer(amount, fromAccountId, toAccountId);
         }
     }
 }
