@@ -4,6 +4,6 @@ namespace Minibank.Core.Services
 {
     public interface ICurrencyConverter
     {
-        public decimal ConvertRubles(decimal? amount, string currencyCode);
+        public decimal Convert(decimal? amount, string fromCurrency, string toCurrency);
     }
 }

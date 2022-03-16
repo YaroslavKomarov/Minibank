@@ -5,19 +5,19 @@ namespace Minibank.Web.Controllers
 {
     [ApiController]
     [Route("api/v1/minibank/[controller]/[action]")]
-    public class CurrencyController : Controller
+    public class ConverterController : ControllerBase
     {
         private readonly ICurrencyConverter converter;
 
-        public CurrencyController(ICurrencyConverter converter)
+        public ConverterController(ICurrencyConverter converter)
         {
             this.converter = converter;
         }
 
         [HttpGet]
-        public decimal Convert(decimal? amount, string currencyCode)
+        public decimal Convert(decimal? amount, string fromCurrency, string toCurrency)
         {
-            return converter.ConvertRubles(amount, currencyCode);
+            return converter.Convert(amount, fromCurrency, toCurrency);
         }
     }
 }
