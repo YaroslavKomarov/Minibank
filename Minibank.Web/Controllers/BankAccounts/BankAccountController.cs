@@ -22,7 +22,7 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
 
         [HttpGet]
-        public decimal GetTransferCommission(decimal amount, string fromAccountId, string toAccountId)
+        public decimal GetTransferCommission(decimal? amount, string fromAccountId, string toAccountId)
         {
             return accountService.GetTransferCommission(amount, fromAccountId, toAccountId);
         }
@@ -34,7 +34,7 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
 
         [HttpPut]
-        public void PutTransferFunds(decimal amount, string fromAccountId, string toAccountId)
+        public void PutTransferFunds(decimal? amount, string fromAccountId, string toAccountId)
         {
             accountService.PutFundsTransfer(amount, fromAccountId, toAccountId);
         }

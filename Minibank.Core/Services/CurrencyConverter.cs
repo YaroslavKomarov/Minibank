@@ -5,6 +5,7 @@ namespace Minibank.Core.Services
     public class CurrencyConverter : ICurrencyConverter
     {
         private readonly ICurrencyRate currencyRate;
+
         private static readonly string mainCurrencyCode = "RUB";
 
         public CurrencyConverter(ICurrencyRate currencyRate)
@@ -15,10 +16,9 @@ namespace Minibank.Core.Services
         public decimal Convert(decimal? amount, string fromCurrency, string toCurrency)
         {
             ValidateArguments(amount, fromCurrency, toCurrency);
-
             var validAmount = (decimal)amount;
 
-            if (fromCurrency == mainCurrencyCode && toCurrency == mainCurrencyCode)
+            if (fromCurrency == mainCurrencyCode && toCurrency == mainCurrencyCode || fromCurrency == toCurrency)
             {
                 return Math.Round(validAmount, 2);
             }
@@ -28,7 +28,7 @@ namespace Minibank.Core.Services
             }
             else if (fromCurrency != mainCurrencyCode && toCurrency != mainCurrencyCode)
             {
-                return ConverBothNonMainCurrencies(validAmount, fromCurrency, toCurrency);
+                return ConvertBothNonMainCurrencies(validAmount, fromCurrency, toCurrency);
             }
             else
             {
@@ -42,7 +42,7 @@ namespace Minibank.Core.Services
             return Math.Round(currencyAmount, 2);
         }
 
-        private decimal ConverBothNonMainCurrencies(decimal amount, string fromCurrency, string toCurrency)
+        private decimal ConvertBothNonMainCurrencies(decimal amount, string fromCurrency, string toCurrency)
         {
             var mainCurrencyAmount = amount * currencyRate.GetCurrencyRate(fromCurrency);
             return ConvertFromMainCurrency(mainCurrencyAmount, toCurrency);

@@ -51,24 +51,22 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             accountRepository.DeleteBankAccountById(id);
         }
 
-        public decimal GetTransferCommission(decimal amount, string fromAccountId, string toAccountId)
+        public decimal GetTransferCommission(decimal? amount, string fromAccountId, string toAccountId)
         {
+            if (amount == null)
+            {
+                throw new ValidationException("Передана пустая сумма");
+            }
+            var validAmount = (decimal)amount;
+
             var sourceAccount = accountRepository.GetBankAccountById(fromAccountId);
             var destinationAccount = accountRepository.GetBankAccountById(toAccountId);
 
-            if (sourceAccount == null)
-            {
-                throw new ValidationException("Аккаунт источника с переданным идентефикатором не существует");
-            }
-
-            if (destinationAccount == null)
-            {
-                throw new ValidationException("Аккаунт назначения с переданным идентефикатором не существует");
-            }
+            ValidateTransferAccounts(sourceAccount, destinationAccount);
 
             if (sourceAccount.UserId != destinationAccount.UserId)
             {
-                var commission = amount / 100 * commissionPercentage;
+                var commission = validAmount / 100 * commissionPercentage;
                 return Math.Round(commission, 2);
             }
 
@@ -92,51 +90,79 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             accountRepository.PostBankAccount(userId, currencyCode);
         }
 
-        public void PutFundsTransfer(decimal amount, string fromAccountId, string toAccountId)
+        public void PutFundsTransfer(decimal? amount, string fromAccountId, string toAccountId)
         {
-            var transferCommission = GetTransferCommission(amount, fromAccountId, toAccountId);
+            if (amount == null)
+            {
+                throw new ValidationException("Передана пустая сумма");
+            }
+            var validAmount = (decimal)amount;
 
-            var sourceAccount = accountRepository.GetBankAccountById(fromAccountId);
-            var destinationAccount = accountRepository.GetBankAccountById(toAccountId);
+            var commission = GetTransferCommission(validAmount, fromAccountId, toAccountId);
 
-            amount = GetAmountAccordingToCurrency(amount, sourceAccount, destinationAccount);
+            var source = accountRepository.GetBankAccountById(fromAccountId);
+            var destination = accountRepository.GetBankAccountById(toAccountId);
 
-            MakeFundsTransfer(amount, transferCommission, sourceAccount, destinationAccount);
+            WithdrawFundsFromSourceAccount(validAmount, source);
+
+            TransferFundsToDestinationAccount(validAmount, commission, source, destination);
 
             historyRepository.PostMoneyTransfersHistory(new MoneyTransferHistory
             {
-                Amount = amount,
+                Amount = validAmount,
                 FromAccountId = fromAccountId,
                 ToAccountId = toAccountId,
             });
         }
 
-        private decimal GetAmountAccordingToCurrency(
-            decimal amount, 
-            BankAccount sourceAccount, 
-            BankAccount destinationAccount)
-        {
-            if (sourceAccount.CurrencyCode != destinationAccount.CurrencyCode)
-            {
-                return converter.Convert(amount, sourceAccount.CurrencyCode, destinationAccount.CurrencyCode);
-            }
-            return amount;
-        }
-
-        private void MakeFundsTransfer(
-            decimal amount,
-            decimal commision,
-            BankAccount sourceAccount,
-            BankAccount destinationAccount)
+        private void WithdrawFundsFromSourceAccount(decimal amount, BankAccount sourceAccount)
         {
             if (sourceAccount.Amount - amount >= 0)
             {
                 sourceAccount.Amount -= amount;
-                destinationAccount.Amount += amount - commision;
             }
+
             throw new ValidationException(
                 $"Недостаточно средств для осуществления перевода, баланс: {sourceAccount.Amount} {sourceAccount.CurrencyCode}"
             );
+        }
+        
+        private void TransferFundsToDestinationAccount(
+            decimal initialAmount, 
+            decimal initialCommission, 
+            BankAccount source,
+            BankAccount destination)
+        {
+            var amount = GetMoneyInNewCurrency(initialAmount, source.CurrencyCode, destination.CurrencyCode);
+            var commission = GetMoneyInNewCurrency(initialCommission, source.CurrencyCode, destination.CurrencyCode);
+
+            destination.Amount += amount - commission;
+        }
+
+        private decimal GetMoneyInNewCurrency(
+            decimal amount, 
+            string fromCurrency, 
+            string toCurrency)
+        {
+            if (fromCurrency != toCurrency)
+            {
+                return converter.Convert(amount, fromCurrency, toCurrency);
+            }
+
+            return amount;
+        }
+
+        private void ValidateTransferAccounts(BankAccount sourceAccount, BankAccount destinationAccount)
+        {
+            if (sourceAccount == null)
+            {
+                throw new ValidationException("Аккаунт источника с переданным идентефикатором не существует");
+            }
+
+            if (destinationAccount == null)
+            {
+                throw new ValidationException("Аккаунт назначения с переданным идентефикатором не существует");
+            }
         }
     }
 }
