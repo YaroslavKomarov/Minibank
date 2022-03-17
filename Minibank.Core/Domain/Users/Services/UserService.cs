@@ -28,7 +28,10 @@ namespace Minibank.Core.Domains.Users.Services
                 throw new ValidationException("Невозможно удалить пользователя с открытым аккаунтом");
             }
 
-            userRepository.DeleteUserById(id);
+            if (!userRepository.DeleteUserById(id))
+            {
+                throw new ValidationException("Не удалось удалить пользователя");
+            }
         }
 
         public void UpdateUser(User user)

@@ -8,7 +8,8 @@ namespace Minibank.Data.MoneyTransfersHistory.Repositories
     public class MoneyTransferHistoryRepository : IMoneyTransferHistoryRepository
     {
         private static List<MoneyTransferHistoryDbModel> moneyTransferHistoryStorage = new List<MoneyTransferHistoryDbModel>();
-        public void PostMoneyTransfersHistory(MoneyTransferHistory history)
+
+        public void CreateMoneyTransfersHistory(MoneyTransferHistory history)
         {
             var moneyTransferHistoryModel = new MoneyTransferHistoryDbModel
             {

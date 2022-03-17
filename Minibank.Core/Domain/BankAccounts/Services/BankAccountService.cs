@@ -54,7 +54,11 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             }
 
             account.IsClosed = true;
-            accountRepository.UpdateBankAccount(account);
+            account.ClosingDate = DateTime.Now;
+            if (!accountRepository.UpdateBankAccount(account))
+            {
+                throw new ValidationException("Не удалось закрыть аккаунт");
+            }
         }
 
         public decimal GetTransferCommission(decimal? amount, string fromAccountId, string toAccountId)
@@ -106,7 +110,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
 
             TransferFundsToDestinationAccount(validAmount, commission, source, destination);
 
-            historyRepository.PostMoneyTransfersHistory(new MoneyTransferHistory
+            historyRepository.CreateMoneyTransfersHistory(new MoneyTransferHistory
             {
                 Amount = validAmount,
                 FromAccountId = fromAccountId,
@@ -119,7 +123,10 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             if (source.Amount - amount >= 0)
             {
                 source.Amount -= amount;
-                accountRepository.UpdateBankAccount(source);
+                if (!accountRepository.UpdateBankAccount(source))
+                {
+                    throw new ValidationException("Не удалось совершить перевод");
+                }
                 return;
             }
 
@@ -138,7 +145,10 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             var transferAmount = GetMoneyInNewCurrency(amountWithoutCommission, source.CurrencyCode, destination.CurrencyCode);
 
             destination.Amount += transferAmount;
-            accountRepository.UpdateBankAccount(destination);
+            if (!accountRepository.UpdateBankAccount(destination))
+            {
+                throw new ValidationException("Не удалось совершить перевод");
+            }
         }
 
         private decimal GetMoneyInNewCurrency(

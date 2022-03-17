@@ -4,6 +4,6 @@ namespace Minibank.Core.Domains.MoneyTransfersHistory.Repositories
 {
     public interface IMoneyTransferHistoryRepository
     {
-        void PostMoneyTransfersHistory(MoneyTransferHistory history);
+        void CreateMoneyTransfersHistory(MoneyTransferHistory history);
     }
 }

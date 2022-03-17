@@ -14,28 +14,34 @@ namespace Minibank.Web.Controllers.BankAccounts
             accountService = service;
         }
 
-        [HttpPut]
+        [HttpDelete]
         public void CloseBankAccountById(string id)
         {
             accountService.CloseBankAccountById(id);
         }
 
         [HttpGet]
-        public decimal GetTransferCommission(decimal? amount, string fromAccountId, string toAccountId)
+        public decimal GetTransferCommission(TransferDto model)
         {
-            return accountService.GetTransferCommission(amount, fromAccountId, toAccountId);
+            return accountService.GetTransferCommission(
+                model.amount, 
+                model.fromAccountId, 
+                model.toAccountId);
         }
 
         [HttpPost]
-        public void CreateBankAccount(string userId, string currencyCode)
+        public void CreateBankAccount(CreateBankAccountDto model)
         {
-            accountService.CreateBankAccount(userId, currencyCode);
+            accountService.CreateBankAccount(model.UserId, model.CurrencyCode);
         }
 
         [HttpPut]
-        public void UpdateTransferFunds(decimal? amount, string fromAccountId, string toAccountId)
+        public void UpdateTransferFunds(TransferDto model)
         {
-            accountService.UpdateFundsTransfer(amount, fromAccountId, toAccountId);
+            accountService.UpdateFundsTransfer(
+                model.amount,
+                model.fromAccountId,
+                model.toAccountId);
         }
     }
 }

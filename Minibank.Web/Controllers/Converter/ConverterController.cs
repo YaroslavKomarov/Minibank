@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Minibank.Core.Services;
 
-namespace Minibank.Web.Controllers
+namespace Minibank.Web.Controllers.Converter
 {
     [ApiController]
     [Route("api/v1/minibank/[controller]/[action]")]
@@ -15,9 +15,12 @@ namespace Minibank.Web.Controllers
         }
 
         [HttpGet]
-        public decimal Convert(decimal? amount, string fromCurrency, string toCurrency)
+        public decimal Convert(ConverterDto model)
         {
-            return converter.Convert(amount, fromCurrency, toCurrency);
+            return converter.Convert(
+                model.amount, 
+                model.fromCurrency, 
+                model.toCurrency);
         }
     }
 }
