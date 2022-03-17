@@ -12,7 +12,7 @@ using System;
 
 namespace Minibank.Data
 {
-    public static class DependencyRegistrator
+    public static class Bootstrapper
     {
         public static IServiceCollection AddData(this IServiceCollection services, IConfiguration configuration)
         {

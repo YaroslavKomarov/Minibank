@@ -5,7 +5,7 @@ using Minibank.Core.Services;
 
 namespace Minibank.Core
 {
-    public static class DependencyRegistrator
+    public static class Bootstrapper
     {
         public static IServiceCollection AddCore(this IServiceCollection services)
         {

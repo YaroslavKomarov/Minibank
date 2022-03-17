@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Minibank.Core;
-using Minibank.Core.Services;
 using Minibank.Data;
 using Minibank.Web.Middlewares;
 
@@ -39,7 +38,7 @@ namespace Minibank.Web
         {
             app.UseMiddleware<ExceptionMiddleware>();
 
-            app.UseMiddleware<ValidateExceptionMiddleware>();
+            app.UseMiddleware<ValidationExceptionMiddleware>();
 
             if (env.IsDevelopment())
             {

@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace Minibank.Web.Middlewares
 {
-    public class ValidateExceptionMiddleware
+    public class ValidationExceptionMiddleware
     {
         public readonly RequestDelegate _next;
 
-        public ValidateExceptionMiddleware(RequestDelegate next)
+        public ValidationExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
         }
