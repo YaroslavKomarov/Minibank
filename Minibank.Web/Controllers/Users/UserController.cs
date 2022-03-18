@@ -33,7 +33,7 @@ namespace Minibank.Web.Controllers.Users
         }
 
         [HttpPut]
-        public void UpdateUser(UserDto model)
+        public void UpdateUser([FromBody] UserDto model)
         {
             userService.UpdateUser(new User
             {

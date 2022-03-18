@@ -27,13 +27,13 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
 
         [HttpPost]
-        public void CreateBankAccount(CreateBankAccountDto model)
+        public void CreateBankAccount([FromBody] CreateBankAccountDto model)
         {
             accountService.CreateBankAccount(model.UserId, model.CurrencyCode);
         }
 
         [HttpPut]
-        public void UpdateTransferFunds(TransferDto model)
+        public void UpdateTransferFunds([FromBody] TransferDto model)
         {
             accountService.UpdateFundsTransfer(
                 model.Amount,
