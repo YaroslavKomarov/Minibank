@@ -2,8 +2,8 @@
 {
     public class TransferDto
     {
-        public decimal? amount { get; set; }
-        public string fromAccountId { get; set; }
-        public string toAccountId { get; set; }
+        public decimal? Amount { get; set; }
+        public string FromAccountId { get; set; }
+        public string ToAccountId { get; set; }
     }
 }

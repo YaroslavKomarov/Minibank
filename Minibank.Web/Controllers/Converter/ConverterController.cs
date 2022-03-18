@@ -15,12 +15,9 @@ namespace Minibank.Web.Controllers.Converter
         }
 
         [HttpGet]
-        public decimal Convert(ConverterDto model)
+        public decimal Convert(decimal? amount, string fromCurrency, string toCurrency)
         {
-            return converter.Convert(
-                model.amount, 
-                model.fromCurrency, 
-                model.toCurrency);
+            return converter.Convert(amount, fromCurrency, toCurrency);
         }
     }
 }

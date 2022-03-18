@@ -21,12 +21,9 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
 
         [HttpGet]
-        public decimal GetTransferCommission(TransferDto model)
+        public decimal GetTransferCommission(decimal? amount, string fromAccountId, string toAccountId)
         {
-            return accountService.GetTransferCommission(
-                model.amount, 
-                model.fromAccountId, 
-                model.toAccountId);
+            return accountService.GetTransferCommission(amount, fromAccountId, toAccountId);
         }
 
         [HttpPost]
@@ -39,9 +36,9 @@ namespace Minibank.Web.Controllers.BankAccounts
         public void UpdateTransferFunds(TransferDto model)
         {
             accountService.UpdateFundsTransfer(
-                model.amount,
-                model.fromAccountId,
-                model.toAccountId);
+                model.Amount,
+                model.FromAccountId,
+                model.ToAccountId);
         }
     }
 }
