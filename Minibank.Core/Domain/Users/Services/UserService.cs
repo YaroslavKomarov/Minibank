@@ -1,6 +1,6 @@
 ﻿using Minibank.Core.Domains.BankAccounts.Repositories;
 using Minibank.Core.Domains.Users.Repositories;
-using System.ComponentModel.DataAnnotations;
+using Minibank.Core.Services;
 
 namespace Minibank.Core.Domains.Users.Services
 {

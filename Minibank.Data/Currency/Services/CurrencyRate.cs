@@ -16,7 +16,7 @@ namespace Minibank.Data.Services
 
         public decimal GetCurrencyRate(string currencyCode)
         {
-            var response = httpClient.GetFromJsonAsync<RateResponse>("daily_json.js")
+            var response = httpClient.GetFromJsonAsync<CurrencyRateResponse>("daily_json.js")
                  .GetAwaiter().GetResult();
 
             return response.Valute[currencyCode].Value;

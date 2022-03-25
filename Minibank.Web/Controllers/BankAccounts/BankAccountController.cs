@@ -14,10 +14,10 @@ namespace Minibank.Web.Controllers.BankAccounts
             accountService = service;
         }
 
-        [HttpDelete]
-        public void CloseBankAccountById(string id)
+        [HttpPost]
+        public void CloseBankAccountById([FromBody] CloseBankAccountDto model)
         {
-            accountService.CloseBankAccountById(id);
+            accountService.CloseBankAccountById(model.Id);
         }
 
         [HttpGet]
