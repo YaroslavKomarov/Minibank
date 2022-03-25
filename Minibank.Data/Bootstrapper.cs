@@ -5,8 +5,8 @@ using Minibank.Core.Domains.MoneyTransfersHistory.Repositories;
 using Minibank.Core.Domains.Users.Repositories;
 using Minibank.Core.Services;
 using Minibank.Data.BankAccounts.Repositories;
+using Minibank.Data.Currency.Services;
 using Minibank.Data.MoneyTransfersHistory.Repositories;
-using Minibank.Data.Services;
 using Minibank.Data.Users.Repositories;
 using System;
 

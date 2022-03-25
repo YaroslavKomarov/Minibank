@@ -38,18 +38,20 @@ namespace Minibank.Data.BankAccounts.Repositories
             return accountModel == null ? false : true;
         }
 
-        public void CreateBankAccount(string userId, string currencyCode)
+        public string CreateBankAccount(string userId, string currencyCode)
         {
-            var accountModel = new BankAccountDbModel
+            var id = Guid.NewGuid().ToString();
+
+            bankAccountStorage.Add(new BankAccountDbModel
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = id,
                 UserId = userId,
                 CurrencyCode = currencyCode,
                 OpeningDate = DateTime.Now,
                 Amount = 1000
-            };
+            });
 
-            bankAccountStorage.Add(accountModel);
+            return id;
         }
 
         public bool UpdateBankAccount(BankAccount bankAccount)

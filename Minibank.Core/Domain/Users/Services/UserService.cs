@@ -16,9 +16,9 @@ namespace Minibank.Core.Domains.Users.Services
             this.accountRepository = accountRepository;
         }
 
-        public void CreateUser(User user)
+        public string CreateUser(User user)
         {
-            userRepository.CreateUser(user);
+            return userRepository.CreateUser(user);
         }
 
         public void DeleteUserById(string id)

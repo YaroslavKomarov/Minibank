@@ -80,7 +80,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             return 0;
         }
 
-        public void CreateBankAccount(string userId, string currencyCode)
+        public string CreateBankAccount(string userId, string currencyCode)
         {
             var user = userRepository.GetUserById(userId);
 
@@ -94,7 +94,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
                 throw new ValidationException($"Недопустимый валютный код: {currencyCode}");
             }
 
-            accountRepository.CreateBankAccount(userId, currencyCode);
+            return accountRepository.CreateBankAccount(userId, currencyCode);
         }
 
         public void UpdateFundsTransfer(decimal? amount, string fromAccountId, string toAccountId)

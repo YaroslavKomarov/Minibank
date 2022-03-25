@@ -7,6 +7,6 @@ namespace Minibank.Core.Domains.BankAccounts.Repositories
         BankAccount GetBankAccountById(string id);
         bool UpdateBankAccount(BankAccount bankAccount);
         bool ExistBankAccountByUserId(string userId);
-        void CreateBankAccount(string userId, string currencyCode);
+        string CreateBankAccount(string userId, string currencyCode);
     }
 }

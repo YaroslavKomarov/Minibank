@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Minibank.Data.HttpClients.Models
+namespace Minibank.Data.Currency
 {
     public class CurrencyRateResponse
     {

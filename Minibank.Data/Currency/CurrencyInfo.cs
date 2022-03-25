@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Minibank.Data.HttpClients.Models
+namespace Minibank.Data.Currency
 {
     public class CurrencyInfo
     {

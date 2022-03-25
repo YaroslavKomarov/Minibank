@@ -17,9 +17,9 @@ namespace Minibank.Web.Controllers.Users
         }
 
         [HttpPost]
-        public void CreateUser(CreateUserDto model)
+        public string CreateUser(CreateUserDto model)
         {
-            userService.CreateUser(new User
+            return userService.CreateUser(new User
             {
                 Login = model.Login,
                 Email = model.Email

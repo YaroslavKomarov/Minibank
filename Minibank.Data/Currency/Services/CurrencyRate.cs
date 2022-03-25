@@ -1,9 +1,8 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
 using Minibank.Core.Services;
-using Minibank.Data.HttpClients.Models;
 
-namespace Minibank.Data.Services
+namespace Minibank.Data.Currency.Services
 {
     public class CurrencyRate : ICurrencyRate
     {

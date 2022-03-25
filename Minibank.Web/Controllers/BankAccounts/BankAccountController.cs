@@ -27,9 +27,9 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
 
         [HttpPost]
-        public void CreateBankAccount([FromBody] CreateBankAccountDto model)
+        public string CreateBankAccount([FromBody] CreateBankAccountDto model)
         {
-            accountService.CreateBankAccount(model.UserId, model.CurrencyCode);
+            return accountService.CreateBankAccount(model.UserId, model.CurrencyCode);
         }
 
         [HttpPut]

@@ -39,14 +39,18 @@ namespace Minibank.Data.Users.Repositories
             };
         }
 
-        public void CreateUser(User user)
+        public string CreateUser(User user)
         {
+            var id = Guid.NewGuid().ToString();
+
             userStorage.Add(new UserDbModel
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = id,
                 Login = user.Login,
                 Email = user.Email
             });
+
+            return id;
         }
 
         public bool UpdateUser(User user)
