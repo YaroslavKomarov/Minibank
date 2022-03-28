@@ -45,7 +45,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
 
             if (account == null) 
             {
-                throw new ValidationException("Аккаунт с переданным идентефикатором не существует");
+                throw new ValidationException("Аккаунт с переданным идентификатором не существует");
             }
 
             if (account.Amount != 0) 
@@ -168,7 +168,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         {
             if (sourceAccount == null)
             {
-                throw new ValidationException("Аккаунт с переданным идентефикатором не существует");
+                throw new ValidationException("Аккаунт с переданным идентификатором не существует");
             }
         }
 
