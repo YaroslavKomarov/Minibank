@@ -4,8 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Minibank.Core.Services;
-using Minibank.Data.Services;
+using Minibank.Core;
+using Minibank.Data;
 using Minibank.Web.Middlewares;
 
 namespace Minibank.Web
@@ -28,9 +28,9 @@ namespace Minibank.Web
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Minibank.Web", Version = "v1" });
             });
-
-            services.AddScoped<ICurrencyRate, CurrencyRate>();
-            services.AddScoped<ICurrencyConverter, CurrencyConverter>();
+            services
+                .AddData(Configuration)
+                .AddCore();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -38,7 +38,7 @@ namespace Minibank.Web
         {
             app.UseMiddleware<ExceptionMiddleware>();
 
-            app.UseMiddleware<InvalidCurrencyArgumentsExceptionMiddleware>();
+            app.UseMiddleware<ValidationExceptionMiddleware>();
 
             if (env.IsDevelopment())
             {
