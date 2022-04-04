@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Minibank.Core.Services;
+﻿using Minibank.Core.Domain.Exceptions;
+using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using System.Linq;
+using System;
 
 namespace Minibank.Web.Middlewares
 {
@@ -20,6 +22,11 @@ namespace Minibank.Web.Middlewares
                 await _next(httpContext);
             }
             catch (ValidationException ex)
+            {
+                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                await httpContext.Response.WriteAsJsonAsync(new { Message = ex.Message });
+            }
+            catch (FluentValidation.ValidationException ex)
             {
                 httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
                 await httpContext.Response.WriteAsJsonAsync(new { Message = ex.Message });

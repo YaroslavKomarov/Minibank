@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Minibank.Core.Domain.Exceptions;
+using System;
 
 namespace Minibank.Core.Services
 {

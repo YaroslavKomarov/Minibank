@@ -1,30 +1,39 @@
-﻿using Minibank.Core.Domains.Users;
-using Minibank.Core.Domains.Users.Repositories;
+﻿using Minibank.Core.Domains.Users.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Minibank.Core.Domains.Users;
+using System.Threading.Tasks;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Minibank.Data.Users.Repositories
 {
-    internal class UserRepository : IUserRepository
+    public class UserRepository : IUserRepository
     {
-        private static List<UserDbModel> userStorage = new List<UserDbModel>();
+        private readonly MinibankContext context;
 
-        public bool DeleteUserById(string id)
+        public UserRepository(MinibankContext context)
         {
-            var userModel = userStorage.FirstOrDefault(it => it.Id == id);
+            this.context = context;
+        }
+
+        public async Task<bool> DeleteUserByIdAsync(string id)
+        {
+            var userModel = await context.Users.FirstOrDefaultAsync(it => it.Id == id);
             
             if (userModel != null)
             {
-                return userStorage.Remove(userModel);
+                context.Users.Remove(userModel);
+
+                return true;
             }
 
             return false;
         }
 
-        public User GetUserById(string id)
+        public async Task<User> GetUserByIdAsync(string id)
         {
-            var userModel = userStorage.FirstOrDefault(it => it.Id == id);
+            var userModel = await context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(it => it.Id == id);
 
             if (userModel == null)
             {
@@ -39,11 +48,11 @@ namespace Minibank.Data.Users.Repositories
             };
         }
 
-        public string CreateUser(User user)
+        public async Task<string> CreateUserAsync(User user)
         {
             var id = Guid.NewGuid().ToString();
 
-            userStorage.Add(new UserDbModel
+            await context.Users.AddAsync(new UserDbModel
             {
                 Id = id,
                 Login = user.Login,
@@ -53,22 +62,39 @@ namespace Minibank.Data.Users.Repositories
             return id;
         }
 
-        public bool UpdateUser(User user)
+        public async Task<bool> UpdateUserAsync(User user)
         {
-            var oldUserModel = userStorage.FirstOrDefault(it => it.Id == user.Id);
+            var oldUserModel = await context.Users.FirstOrDefaultAsync(it => it.Id == user.Id);
 
             if (oldUserModel != null)
             {
-                userStorage[userStorage.IndexOf(oldUserModel)] = new UserDbModel
-                {
-                    Id = user.Id,
-                    Login = user.Login,
-                    Email = user.Email
-                };
+                oldUserModel.Login = user.Login;
+                oldUserModel.Email = user.Email;
+
                 return true;
             }
 
             return false;
+        }
+
+        public async Task<bool> CheckIsUserLoginUniqueAsync(string login)
+        {
+            if (await context.Users.FirstOrDefaultAsync(it => it.Login == login) != null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> CheckIsUserEmailUniqueAsync(string email)
+        {
+            if (await context.Users.FirstOrDefaultAsync(it => it.Email == email) != null)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

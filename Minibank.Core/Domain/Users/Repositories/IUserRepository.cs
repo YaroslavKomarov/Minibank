@@ -1,12 +1,14 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 
 namespace Minibank.Core.Domains.Users.Repositories
 {
     public interface IUserRepository
     {
-        User GetUserById(string id);
-        string CreateUser(User user);
-        bool DeleteUserById(string id);
-        bool UpdateUser(User user);
+        Task<User> GetUserByIdAsync(string id);
+        Task<string> CreateUserAsync(User user);
+        Task<bool> DeleteUserByIdAsync(string id);
+        Task<bool> UpdateUserAsync(User user);
+        Task<bool> CheckIsUserLoginUniqueAsync(string login);
+        Task<bool> CheckIsUserEmailUniqueAsync(string email);
     }
 }

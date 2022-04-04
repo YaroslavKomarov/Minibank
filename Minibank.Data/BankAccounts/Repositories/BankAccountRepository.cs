@@ -1,18 +1,25 @@
 ﻿using Minibank.Core.Domains.BankAccounts.Repositories;
-using System.Collections.Generic;
-using System;
-using System.Linq;
 using Minibank.Core.Domains.BankAccounts;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using System;
 
 namespace Minibank.Data.BankAccounts.Repositories
 {
     public class BankAccountRepository : IBankAccountRepository
     {
-        private static List<BankAccountDbModel> bankAccountStorage = new List<BankAccountDbModel>();
+        private readonly MinibankContext context;
 
-        public BankAccount GetBankAccountById(string id)
+        public BankAccountRepository(MinibankContext context)
         {
-            var accountModel = bankAccountStorage.FirstOrDefault(it => it.Id == id);
+            this.context = context;
+        }
+
+        public async Task<BankAccount> GetBankAccountByIdAsync(string id)
+        {
+            var accountModel = await context.BancAccounts
+                .AsNoTracking()
+                .FirstOrDefaultAsync(it => it.Id == id);
 
             if (accountModel == null)
             {
@@ -31,18 +38,20 @@ namespace Minibank.Data.BankAccounts.Repositories
             };
         }
 
-        public bool ExistBankAccountByUserId(string userId)
+        public async Task<bool> CheckIsBankAccountByUserIdExistAsync(string userId)
         {
-            var accountModel = bankAccountStorage.FirstOrDefault(it => it.UserId == userId);
+            var accountModel = await context.BancAccounts
+                .AsNoTracking()
+                .FirstOrDefaultAsync(it => it.UserId == userId);
 
             return accountModel == null ? false : true;
         }
 
-        public string CreateBankAccount(string userId, string currencyCode)
+        public async Task<string> CreateBankAccountAsync(string userId, string currencyCode)
         {
             var id = Guid.NewGuid().ToString();
 
-            bankAccountStorage.Add(new BankAccountDbModel
+            await context.BancAccounts.AddAsync(new BankAccountDbModel
             {
                 Id = id,
                 UserId = userId,
@@ -54,22 +63,20 @@ namespace Minibank.Data.BankAccounts.Repositories
             return id;
         }
 
-        public bool UpdateBankAccount(BankAccount bankAccount)
+        public async Task<bool> UpdateBankAccountAsync(BankAccount bankAccount)
         {
-            var oldAccountModel = bankAccountStorage.FirstOrDefault(it => it.Id == bankAccount.Id);
+            var oldAccountModel = await context.BancAccounts
+                .FirstOrDefaultAsync(it => it.Id == bankAccount.Id);
 
             if (oldAccountModel != null)
             {
-                bankAccountStorage[bankAccountStorage.IndexOf(oldAccountModel)] = new BankAccountDbModel
-                {
-                    Id = bankAccount.Id,
-                    UserId = bankAccount.UserId,
-                    Amount = bankAccount.Amount,
-                    CurrencyCode = bankAccount.CurrencyCode,
-                    OpeningDate = bankAccount.OpeningDate,
-                    ClosingDate = bankAccount.ClosingDate,
-                    IsClosed = bankAccount.IsClosed
-                };
+                oldAccountModel.UserId = bankAccount.UserId;
+                oldAccountModel.Amount = bankAccount.Amount;
+                oldAccountModel.CurrencyCode = bankAccount.CurrencyCode;
+                oldAccountModel.OpeningDate = bankAccount.OpeningDate;
+                oldAccountModel.ClosingDate = bankAccount.ClosingDate;
+                oldAccountModel.IsClosed = bankAccount.IsClosed;
+
                 return true;
             }
 

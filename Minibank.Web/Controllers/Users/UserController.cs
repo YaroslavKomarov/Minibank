@@ -2,6 +2,7 @@
 using Minibank.Core.Domains.Users;
 using Minibank.Core.Domains.Users.Services;
 using Minibank.Web.Controllers.Users.DTO;
+using System.Threading.Tasks;
 
 namespace Minibank.Web.Controllers.Users
 {
@@ -17,9 +18,9 @@ namespace Minibank.Web.Controllers.Users
         }
 
         [HttpPost]
-        public string CreateUser(CreateUserDto model)
+        public async Task<string> CreateUserAsync(CreateUserDto model)
         {
-            return userService.CreateUser(new User
+            return await userService.CreateUserAsync(new User
             {
                 Login = model.Login,
                 Email = model.Email
@@ -27,15 +28,15 @@ namespace Minibank.Web.Controllers.Users
         }
 
         [HttpDelete]
-        public void DeleteUserById(string id)
+        public async Task DeleteUserByIdAsync(string id)
         {
-            userService.DeleteUserById(id);
+            await userService.DeleteUserByIdAsync(id);
         }
 
         [HttpPut]
-        public void UpdateUser([FromBody] UserDto model)
+        public async Task UpdateUserAsync([FromBody] UserDto model)
         {
-            userService.UpdateUser(new User
+            await userService.UpdateUserAsync(new User
             {
                 Id = model.Id,
                 Login = model.Login,

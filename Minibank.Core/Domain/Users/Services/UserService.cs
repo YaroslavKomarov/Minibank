@@ -1,45 +1,66 @@
-﻿using Minibank.Core.Domains.BankAccounts.Repositories;
+﻿using ValidationException = Minibank.Core.Domain.Exceptions.ValidationException;
+using Minibank.Core.Domains.BankAccounts.Repositories;
 using Minibank.Core.Domains.Users.Repositories;
-using Minibank.Core.Services;
+using System.Threading.Tasks;
+using FluentValidation;
+using Minibank.Core.Domain.Exceptions;
 
 namespace Minibank.Core.Domains.Users.Services
 {
     public class UserService : IUserService
     {
+        private readonly IUnitOfWork unitOfWork;
+
         private readonly IUserRepository userRepository;
+
+        private readonly IValidator<User> userValidator;
 
         private readonly IBankAccountRepository accountRepository;
 
-        public UserService(IUserRepository userRepository, IBankAccountRepository accountRepository)
+        public UserService(
+            IUnitOfWork unitOfWork,
+            IUserRepository userRepository,
+            IValidator<User> userValidator,
+            IBankAccountRepository accountRepository)
         {
+            this.unitOfWork = unitOfWork;
             this.userRepository = userRepository;
+            this.userValidator = userValidator;
             this.accountRepository = accountRepository;
         }
 
-        public string CreateUser(User user)
+        public async Task<string> CreateUserAsync(User user)
         {
-            return userRepository.CreateUser(user);
+            userValidator.ValidateAndThrow(user, options => options.IncludeRuleSets("Create"));
+
+            var userId = await userRepository.CreateUserAsync(user);
+            unitOfWork.SaveChanges();
+            return userId;
         }
 
-        public void DeleteUserById(string id)
+        public async Task DeleteUserByIdAsync(string id)
         {
-            if (accountRepository.ExistBankAccountByUserId(id))
+            if (await accountRepository.CheckIsBankAccountByUserIdExistAsync(id))
             {
                 throw new ValidationException("Невозможно удалить пользователя с открытым аккаунтом");
             }
 
-            if (!userRepository.DeleteUserById(id))
-            {
-                throw new ValidationException("Не удалось удалить пользователя");
-            }
-        }
-
-        public void UpdateUser(User user)
-        {
-            if (!userRepository.UpdateUser(user))
+            if (!await userRepository.DeleteUserByIdAsync(id))
             {
                 throw new ValidationException("Пользователь с переданным идентификатором не существует");
             }
+
+            unitOfWork.SaveChanges();
+        }
+
+        public async Task UpdateUserAsync(User user)
+        {
+            if (!(await userRepository.UpdateUserAsync(user)))
+            {
+                throw new ValidationException("Пользователь с переданным идентификатором не существует");
+            }
+
+            unitOfWork.SaveChanges();
         }
     }
 }

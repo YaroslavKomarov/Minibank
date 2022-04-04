@@ -1,15 +1,26 @@
-﻿using Minibank.Core.Domains.BankAccounts.Repositories;
-using Minibank.Core.Domains.MoneyTransfersHistory;
+﻿using ValidationException = Minibank.Core.Domain.Exceptions.ValidationException;
 using Minibank.Core.Domains.MoneyTransfersHistory.Repositories;
+using Minibank.Core.Domains.BankAccounts.Repositories;
+using Minibank.Core.Domains.MoneyTransfersHistory;
 using Minibank.Core.Domains.Users.Repositories;
+using Minibank.Core.Domain.Currency;
+using Minibank.Core.Domains.Users;
+using System.Threading.Tasks;
 using Minibank.Core.Services;
+using FluentValidation;
 using System;
-using System.Collections.Generic;
+using Minibank.Core.Domain.Exceptions;
 
 namespace Minibank.Core.Domains.BankAccounts.Services
 {
     internal class BankAccountService : IBankAccountService
     {
+        private readonly IUnitOfWork unitOfWork;
+
+        private readonly IValidator<User> userValidator;
+
+        private readonly IValidator<BankAccount> bankAccountValidator;
+
         private readonly IBankAccountRepository accountRepository;
 
         private readonly IMoneyTransferHistoryRepository historyRepository;
@@ -20,56 +31,48 @@ namespace Minibank.Core.Domains.BankAccounts.Services
 
         private static readonly int commissionPercentage = 2;
 
-        private static readonly HashSet<string> validCurrencies = new HashSet<string>
-        {
-            "RUB",
-            "USD",
-            "EUR"
-        };
-
         public BankAccountService(
+            IUnitOfWork unitOfWork,
+            IValidator<User> userValidator,
+            IValidator<BankAccount> bankAccountValidator,
             IMoneyTransferHistoryRepository historyRepository,
             IBankAccountRepository accountRepository, 
             IUserRepository userRepository,
             ICurrencyConverter converter)
         {
+            this.unitOfWork = unitOfWork;
+            this.userValidator = userValidator;
+            this.bankAccountValidator = bankAccountValidator;
             this.historyRepository = historyRepository;
             this.accountRepository = accountRepository;
             this.userRepository = userRepository;
             this.converter = converter;
         }
 
-        public void CloseBankAccountById(string id)
+        public async Task CloseBankAccountByIdAsync(string id)
         {
-            var account = accountRepository.GetBankAccountById(id);
-
-            if (account == null) 
-            {
-                throw new ValidationException("Аккаунт с переданным идентификатором не существует");
-            }
-
-            if (account.Amount != 0) 
-            {
-                throw new ValidationException("Невозможно удалить аккаунт с ненулевым счетом");
-            }
+            var account = await accountRepository.GetBankAccountByIdAsync(id);
+            bankAccountValidator.ValidateAndThrow(account, options => options.IncludeRuleSets("Close"));
 
             account.IsClosed = true;
             account.ClosingDate = DateTime.Now;
-            if (!accountRepository.UpdateBankAccount(account))
+
+            if (!await accountRepository.UpdateBankAccountAsync(account))
             {
-                throw new ValidationException("Не удалось закрыть аккаунт");
+                throw new ValidationException("Банковский аккаунт с переданным идентификатором не существует");
             }
+            unitOfWork.SaveChanges();
         }
 
-        public decimal GetTransferCommission(decimal? amount, string fromAccountId, string toAccountId)
+        public async Task<decimal> GetTransferCommissionAsync(decimal? amount, string fromAccountId, string toAccountId)
         {
-            var validAmount = ValidateAmount(amount);
+            var validAmount = ValidateAmountAndThrow(amount);
 
-            var source = accountRepository.GetBankAccountById(fromAccountId);
-            var destination = accountRepository.GetBankAccountById(toAccountId);
+            var source = await accountRepository.GetBankAccountByIdAsync(fromAccountId);
+            bankAccountValidator.ValidateAndThrow(source);
 
-            ValidateAccount(source);
-            ValidateAccount(destination);
+            var destination = await accountRepository.GetBankAccountByIdAsync(toAccountId);
+            bankAccountValidator.ValidateAndThrow(destination);
 
             if (source.UserId != destination.UserId)
             {
@@ -80,50 +83,52 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             return 0;
         }
 
-        public string CreateBankAccount(string userId, string currencyCode)
+        public async Task<string> CreateBankAccountAsync(string userId, string currencyCode)
         {
-            var user = userRepository.GetUserById(userId);
+            userValidator.ValidateAndThrow(await userRepository.GetUserByIdAsync(userId));
 
-            if (user == null)
+            if (!Enum.IsDefined(typeof(ValidCurrencies), currencyCode))
             {
-                throw new ValidationException("Пользователь с переданным идентефикатором не существует");
+                throw new ValidationException($"{currencyCode} - Недопустимый валютный код");
             }
 
-            if (!validCurrencies.Contains(currencyCode))
-            {
-                throw new ValidationException($"Недопустимый валютный код: {currencyCode}");
-            }
-
-            return accountRepository.CreateBankAccount(userId, currencyCode);
+            var accuntId = await accountRepository.CreateBankAccountAsync(userId, currencyCode);
+            unitOfWork.SaveChanges();
+            return accuntId;
         }
 
-        public void UpdateFundsTransfer(decimal? amount, string fromAccountId, string toAccountId)
+        public async Task UpdateFundsTransferAsync(decimal? amount, string fromAccountId, string toAccountId)
         {
-            var validAmount = ValidateAmount(amount);
+            var validAmount = ValidateAmountAndThrow(amount);
+            decimal commission = 0;
 
-            var commission = GetTransferCommission(validAmount, fromAccountId, toAccountId);
+            var source = await accountRepository.GetBankAccountByIdAsync(fromAccountId);
+            var destination = await accountRepository.GetBankAccountByIdAsync(toAccountId);
 
-            var source = accountRepository.GetBankAccountById(fromAccountId);
-            var destination = accountRepository.GetBankAccountById(toAccountId);
+            if (source.UserId != destination.UserId)
+            {
+                commission = Math.Round(validAmount / 100 * commissionPercentage, 2);
+            }
 
-            WithdrawFundsFromSourceAccount(validAmount, source);
+            await WithdrawFundsFromSourceAccountAsync(validAmount, source);
 
-            TransferFundsToDestinationAccount(validAmount, commission, source, destination);
+            await TransferFundsToDestinationAccountAsync(validAmount, commission, source, destination);
 
-            historyRepository.CreateMoneyTransfersHistory(new MoneyTransferHistory
+            await historyRepository.CreateMoneyTransfersHistoryAsync(new MoneyTransferHistory
             {
                 Amount = validAmount,
                 FromAccountId = fromAccountId,
                 ToAccountId = toAccountId,
             });
+            unitOfWork.SaveChanges();
         }
 
-        private void WithdrawFundsFromSourceAccount(decimal amount, BankAccount source)
+        private async Task WithdrawFundsFromSourceAccountAsync(decimal amount, BankAccount source)
         {
             if (source.Amount - amount >= 0)
             {
                 source.Amount -= amount;
-                if (!accountRepository.UpdateBankAccount(source))
+                if (!await accountRepository.UpdateBankAccountAsync(source))
                 {
                     throw new ValidationException("Не удалось совершить перевод");
                 }
@@ -135,7 +140,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             );
         }
         
-        private void TransferFundsToDestinationAccount(
+        private async Task TransferFundsToDestinationAccountAsync(
             decimal initialAmount, 
             decimal initialCommission, 
             BankAccount source,
@@ -145,7 +150,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             var transferAmount = GetMoneyInNewCurrency(amountWithoutCommission, source.CurrencyCode, destination.CurrencyCode);
 
             destination.Amount += transferAmount;
-            if (!accountRepository.UpdateBankAccount(destination))
+            if (! await accountRepository.UpdateBankAccountAsync(destination))
             {
                 throw new ValidationException("Не удалось совершить перевод");
             }
@@ -164,20 +169,13 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             return amount;
         }
 
-        private void ValidateAccount(BankAccount sourceAccount)
-        {
-            if (sourceAccount == null)
-            {
-                throw new ValidationException("Аккаунт с переданным идентификатором не существует");
-            }
-        }
-
-        private decimal ValidateAmount(decimal? amount)
+        private decimal ValidateAmountAndThrow(decimal? amount)
         {
             if (amount == null)
             {
                 throw new ValidationException("Передана пустая сумма");
             }
+
             return (decimal)amount;
         }
     }
