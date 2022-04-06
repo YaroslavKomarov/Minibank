@@ -28,8 +28,10 @@ namespace Minibank.Web.Middlewares
             }
             catch (FluentValidation.ValidationException ex)
             {
+                var errMessage = string.Join(Environment.NewLine, ex.Errors.Select(it => $"{it.ErrorMessage}"));
+                
                 httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-                await httpContext.Response.WriteAsJsonAsync(new { Message = ex.Message });
+                await httpContext.Response.WriteAsJsonAsync(new { Message = errMessage });
             }
         }
     }

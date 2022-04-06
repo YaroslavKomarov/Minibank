@@ -13,6 +13,10 @@ namespace Minibank.Core.Domain.BankAccounts.BankAccountValidators
                     .Must(amount => amount == 0)
                     .WithMessage("Банковский аккаунт должен иметь нулевой баланс для закрытия");
             });
+
+            RuleFor(a => a.IsClosed)
+                .Must(isClosed => !isClosed)
+                .WithMessage("Банковский аккаунт закрыт");
         }
 
         protected override void EnsureInstanceNotNull(object instance)

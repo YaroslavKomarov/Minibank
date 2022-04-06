@@ -23,7 +23,7 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
 
         [HttpGet]
-        public async Task<decimal> GetTransferCommissionAsync(decimal? amount, string fromAccountId, string toAccountId, CancellationToken cancellationToken)
+        public async Task<string> GetTransferCommissionAsync(decimal? amount, string fromAccountId, string toAccountId, CancellationToken cancellationToken)
         {
             return await accountService.GetTransferCommissionAsync(
                 amount,

@@ -66,7 +66,7 @@ namespace Minibank.Core.Domains.Users.Services
 
         public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)
         {
-            if (!(await userRepository.UpdateUserAsync(user, cancellationToken)))
+            if (!await userRepository.UpdateUserAsync(user, cancellationToken))
             {
                 throw new ValidationException("Пользователь с переданным идентификатором не существует");
             }

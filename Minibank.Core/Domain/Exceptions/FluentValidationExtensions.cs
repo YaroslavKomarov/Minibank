@@ -1,6 +1,5 @@
 ﻿using FluentValidation.Internal;
 using FluentValidation;
-using System.Linq;
 using System;
 
 namespace Minibank.Core.Domain.Exceptions
@@ -13,9 +12,7 @@ namespace Minibank.Core.Domain.Exceptions
 
             if (!result.IsValid)
             {
-                var errMessage = result.Errors.FirstOrDefault().ErrorMessage;
-
-                throw new FluentValidation.ValidationException(errMessage);
+                throw new FluentValidation.ValidationException(result.Errors);
             }
         }
     }

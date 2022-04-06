@@ -65,27 +65,19 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             unitOfWork.SaveChanges();
         }
 
-        public async Task<decimal> GetTransferCommissionAsync(
+        public async Task<string> GetTransferCommissionAsync(
             decimal? amount,
             string fromAccountId,
             string toAccountId,
             CancellationToken cancellationToken)
         {
-            var validAmount = ValidateAmountAndThrow(amount);
-
             var source = await accountRepository.GetBankAccountByIdAsync(fromAccountId, cancellationToken);
-            bankAccountValidator.ValidateAndThrow(source);
-
             var destination = await accountRepository.GetBankAccountByIdAsync(toAccountId, cancellationToken);
-            bankAccountValidator.ValidateAndThrow(destination);
+            var validAmount = ValidateTransferDataAndThrow(source, destination, amount);
 
-            if (source.UserId != destination.UserId)
-            {
-                var commission = validAmount / 100 * commissionPercentage;
-                return Math.Round(commission, 2);
-            }
+            var commission = CalculateTransferCommission(source, destination, validAmount);
 
-            return 0;
+            return $"{commission} {source.CurrencyCode}";
         }
 
         public async Task<string> CreateBankAccountAsync(
@@ -113,16 +105,10 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             string toAccountId,
             CancellationToken cancellationToken)
         {
-            var validAmount = ValidateAmountAndThrow(amount);
-            decimal commission = 0;
-
             var source = await accountRepository.GetBankAccountByIdAsync(fromAccountId, cancellationToken);
             var destination = await accountRepository.GetBankAccountByIdAsync(toAccountId, cancellationToken);
-
-            if (source.UserId != destination.UserId)
-            {
-                commission = Math.Round(validAmount / 100 * commissionPercentage, 2);
-            }
+            var validAmount = ValidateTransferDataAndThrow(source, destination, amount);
+            var commission = CalculateTransferCommission(source, destination, validAmount);
 
             await WithdrawFundsFromSourceAccountAsync(validAmount, source, cancellationToken);
 
@@ -134,8 +120,36 @@ namespace Minibank.Core.Domains.BankAccounts.Services
                 Amount = validAmount,
                 FromAccountId = fromAccountId,
                 ToAccountId = toAccountId,
-            });
+                CurrencyCode = destination.CurrencyCode
+            }, cancellationToken);
+
             unitOfWork.SaveChanges();
+        }
+
+        private decimal ValidateTransferDataAndThrow(
+            BankAccount source, BankAccount destination, decimal? amount)
+        {
+            bankAccountValidator.ValidateAndThrow(source);
+            bankAccountValidator.ValidateAndThrow(destination);
+
+            if (amount == null)
+            {
+                throw new ValidationException("Передана пустая сумма");
+            }
+
+            return (decimal)amount;
+        }
+
+        private decimal CalculateTransferCommission(
+            BankAccount source, BankAccount destination, decimal amount)
+        {
+            if (source.UserId != destination.UserId)
+            {
+                var commission = amount / 100 * commissionPercentage;
+                return Math.Round(commission, 2);
+            }
+
+            return 0;
         }
 
         private async Task WithdrawFundsFromSourceAccountAsync(
@@ -191,16 +205,6 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             }
 
             return amount;
-        }
-
-        private decimal ValidateAmountAndThrow(decimal? amount)
-        {
-            if (amount == null)
-            {
-                throw new ValidationException("Передана пустая сумма");
-            }
-
-            return (decimal)amount;
         }
     }
 }

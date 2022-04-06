@@ -1,7 +1,8 @@
-﻿using Minibank.Core.Domains.MoneyTransfersHistory;
-using Minibank.Core.Domains.MoneyTransfersHistory.Repositories;
-using System;
+﻿using Minibank.Core.Domains.MoneyTransfersHistory.Repositories;
+using Minibank.Core.Domains.MoneyTransfersHistory;
 using System.Threading.Tasks;
+using System.Threading;
+using System;
 
 namespace Minibank.Data.MoneyTransfersHistory.Repositories
 {
@@ -14,7 +15,9 @@ namespace Minibank.Data.MoneyTransfersHistory.Repositories
             this.context = context;
         }
 
-        public async Task CreateMoneyTransfersHistoryAsync(MoneyTransferHistory history)
+        public async Task CreateMoneyTransfersHistoryAsync(
+            MoneyTransferHistory history,
+            CancellationToken cancellationToken)
         {
             var moneyTransferHistoryModel = new MoneyTransferHistoryDbModel
             {

@@ -12,7 +12,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         Task CloseBankAccountByIdAsync(
             string id,
             CancellationToken cancellationToken);
-        Task<decimal> GetTransferCommissionAsync(
+        Task<string> GetTransferCommissionAsync(
             decimal? amount,
             string fromAccountId, 
             string toAccountId,
