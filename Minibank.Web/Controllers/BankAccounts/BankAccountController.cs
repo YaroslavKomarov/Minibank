@@ -1,6 +1,7 @@
 ﻿using Minibank.Core.Domains.BankAccounts.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Minibank.Web.Controllers.BankAccounts
 {
@@ -16,30 +17,38 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
 
         [HttpPost]
-        public async Task CloseBankAccountByIdAsync([FromBody] CloseBankAccountDto model)
+        public async Task CloseBankAccountByIdAsync([FromBody] CloseBankAccountDto model, CancellationToken cancellationToken)
         {
-            await accountService.CloseBankAccountByIdAsync(model.Id);
+            await accountService.CloseBankAccountByIdAsync(model.Id, cancellationToken);
         }
 
         [HttpGet]
-        public async Task<decimal> GetTransferCommissionAsync(decimal? amount, string fromAccountId, string toAccountId)
+        public async Task<decimal> GetTransferCommissionAsync(decimal? amount, string fromAccountId, string toAccountId, CancellationToken cancellationToken)
         {
-            return await accountService.GetTransferCommissionAsync(amount, fromAccountId, toAccountId);
+            return await accountService.GetTransferCommissionAsync(
+                amount,
+                fromAccountId,
+                toAccountId,
+                cancellationToken);
         }
 
         [HttpPost]
-        public async Task<string> CreateBankAccountASync([FromBody] CreateBankAccountDto model)
+        public async Task<string> CreateBankAccountASync([FromBody] CreateBankAccountDto model, CancellationToken cancellationToken)
         {
-            return await accountService.CreateBankAccountAsync(model.UserId, model.CurrencyCode);
+            return await accountService.CreateBankAccountAsync(
+                model.UserId,
+                model.CurrencyCode,
+                cancellationToken);
         }
 
         [HttpPut]
-        public async Task UpdateTransferFundsASync([FromBody] TransferDto model)
+        public async Task UpdateTransferFundsASync([FromBody] TransferDto model, CancellationToken cancellationToken)
         {
             await accountService.UpdateFundsTransferAsync(
                 model.Amount,
                 model.FromAccountId,
-                model.ToAccountId);
+                model.ToAccountId,
+                cancellationToken);
         }
     }
 }

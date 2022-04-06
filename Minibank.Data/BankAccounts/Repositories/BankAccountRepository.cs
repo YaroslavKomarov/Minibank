@@ -2,6 +2,7 @@
 using Minibank.Core.Domains.BankAccounts;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using System.Threading;
 using System;
 
 namespace Minibank.Data.BankAccounts.Repositories
@@ -15,7 +16,8 @@ namespace Minibank.Data.BankAccounts.Repositories
             this.context = context;
         }
 
-        public async Task<BankAccount> GetBankAccountByIdAsync(string id)
+        public async Task<BankAccount> GetBankAccountByIdAsync(
+            string id, CancellationToken cancellationToken)
         {
             var accountModel = await context.BancAccounts
                 .AsNoTracking()
@@ -38,7 +40,8 @@ namespace Minibank.Data.BankAccounts.Repositories
             };
         }
 
-        public async Task<bool> CheckIsBankAccountByUserIdExistAsync(string userId)
+        public async Task<bool> CheckIsBankAccountByUserIdExistAsync(
+            string userId, CancellationToken cancellationToken)
         {
             var accountModel = await context.BancAccounts
                 .AsNoTracking()
@@ -47,7 +50,8 @@ namespace Minibank.Data.BankAccounts.Repositories
             return accountModel == null ? false : true;
         }
 
-        public async Task<string> CreateBankAccountAsync(string userId, string currencyCode)
+        public async Task<string> CreateBankAccountAsync(
+            string userId, string currencyCode, CancellationToken cancellationToken)
         {
             var id = Guid.NewGuid().ToString();
 
@@ -63,7 +67,8 @@ namespace Minibank.Data.BankAccounts.Repositories
             return id;
         }
 
-        public async Task<bool> UpdateBankAccountAsync(BankAccount bankAccount)
+        public async Task<bool> UpdateBankAccountAsync(
+            BankAccount bankAccount, CancellationToken cancellationToken)
         {
             var oldAccountModel = await context.BancAccounts
                 .FirstOrDefaultAsync(it => it.Id == bankAccount.Id);

@@ -18,7 +18,7 @@ namespace Minibank.Data
     {
         public static IServiceCollection AddData(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddHttpClient<ICurrencyRate, CurrencyRate>(options =>
+            services.AddHttpClient<ICurrencyRateService, CurrencyRateService>(options =>
             {
                 options.BaseAddress = new Uri(configuration["CbrCurrenciesUri"]);
             });

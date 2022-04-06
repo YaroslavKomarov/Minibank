@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Minibank.Core.Domains.Users;
 using System.Threading.Tasks;
+using System.Threading;
 using System;
 
 namespace Minibank.Data.Users.Repositories
@@ -15,7 +16,7 @@ namespace Minibank.Data.Users.Repositories
             this.context = context;
         }
 
-        public async Task<bool> DeleteUserByIdAsync(string id)
+        public async Task<bool> DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
         {
             var userModel = await context.Users.FirstOrDefaultAsync(it => it.Id == id);
             
@@ -29,7 +30,7 @@ namespace Minibank.Data.Users.Repositories
             return false;
         }
 
-        public async Task<User> GetUserByIdAsync(string id)
+        public async Task<User> GetUserByIdAsync(string id, CancellationToken cancellationToken)
         {
             var userModel = await context.Users
                 .AsNoTracking()
@@ -48,7 +49,7 @@ namespace Minibank.Data.Users.Repositories
             };
         }
 
-        public async Task<string> CreateUserAsync(User user)
+        public async Task<string> CreateUserAsync(User user, CancellationToken cancellationToken)
         {
             var id = Guid.NewGuid().ToString();
 
@@ -62,7 +63,7 @@ namespace Minibank.Data.Users.Repositories
             return id;
         }
 
-        public async Task<bool> UpdateUserAsync(User user)
+        public async Task<bool> UpdateUserAsync(User user, CancellationToken cancellationToken)
         {
             var oldUserModel = await context.Users.FirstOrDefaultAsync(it => it.Id == user.Id);
 
@@ -77,7 +78,7 @@ namespace Minibank.Data.Users.Repositories
             return false;
         }
 
-        public async Task<bool> CheckIsUserLoginUniqueAsync(string login)
+        public async Task<bool> CheckIsLoginUniqueAsync(string login, CancellationToken cancellationToken)
         {
             if (await context.Users.FirstOrDefaultAsync(it => it.Login == login) != null)
             {
@@ -87,7 +88,7 @@ namespace Minibank.Data.Users.Repositories
             return true;
         }
 
-        public async Task<bool> CheckIsUserEmailUniqueAsync(string email)
+        public async Task<bool> CheckIsEmailUniqueAsync(string email, CancellationToken cancellationToken)
         {
             if (await context.Users.FirstOrDefaultAsync(it => it.Email == email) != null)
             {

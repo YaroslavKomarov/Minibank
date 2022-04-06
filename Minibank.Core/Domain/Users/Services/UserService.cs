@@ -1,9 +1,10 @@
 ﻿using ValidationException = Minibank.Core.Domain.Exceptions.ValidationException;
 using Minibank.Core.Domains.BankAccounts.Repositories;
 using Minibank.Core.Domains.Users.Repositories;
+using Minibank.Core.Domain.Exceptions;
 using System.Threading.Tasks;
 using FluentValidation;
-using Minibank.Core.Domain.Exceptions;
+using System.Threading;
 
 namespace Minibank.Core.Domains.Users.Services
 {
@@ -29,23 +30,33 @@ namespace Minibank.Core.Domains.Users.Services
             this.accountRepository = accountRepository;
         }
 
-        public async Task<string> CreateUserAsync(User user)
+        public async Task<string> CreateUserAsync(User user, CancellationToken cancellationToken)
         {
             userValidator.ValidateAndThrow(user, options => options.IncludeRuleSets("Create"));
 
-            var userId = await userRepository.CreateUserAsync(user);
+            if (!await userRepository.CheckIsLoginUniqueAsync(user.Login, cancellationToken))
+            {
+                throw new ValidationException("Пользователь с таким логином уже зарегистрирован");
+            }
+
+            if (!await userRepository.CheckIsEmailUniqueAsync(user.Email, cancellationToken))
+            {
+                throw new ValidationException("Пользователь с такой почтой уже зарегистрирован");
+            }
+
+            var userId = await userRepository.CreateUserAsync(user, cancellationToken);
             unitOfWork.SaveChanges();
             return userId;
         }
 
-        public async Task DeleteUserByIdAsync(string id)
+        public async Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
         {
-            if (await accountRepository.CheckIsBankAccountByUserIdExistAsync(id))
+            if (await accountRepository.CheckIsBankAccountByUserIdExistAsync(id, cancellationToken))
             {
                 throw new ValidationException("Невозможно удалить пользователя с открытым аккаунтом");
             }
 
-            if (!await userRepository.DeleteUserByIdAsync(id))
+            if (!await userRepository.DeleteUserByIdAsync(id, cancellationToken))
             {
                 throw new ValidationException("Пользователь с переданным идентификатором не существует");
             }
@@ -53,9 +64,9 @@ namespace Minibank.Core.Domains.Users.Services
             unitOfWork.SaveChanges();
         }
 
-        public async Task UpdateUserAsync(User user)
+        public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)
         {
-            if (!(await userRepository.UpdateUserAsync(user)))
+            if (!(await userRepository.UpdateUserAsync(user, cancellationToken)))
             {
                 throw new ValidationException("Пользователь с переданным идентификатором не существует");
             }
