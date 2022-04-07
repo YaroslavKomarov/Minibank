@@ -21,7 +21,7 @@ namespace Minibank.Data.BankAccounts.Repositories
         {
             var accountModel = await context.BancAccounts
                 .AsNoTracking()
-                .FirstOrDefaultAsync(it => it.Id == id);
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
             if (accountModel == null)
             {
@@ -45,7 +45,7 @@ namespace Minibank.Data.BankAccounts.Repositories
         {
             var accountModel = await context.BancAccounts
                 .AsNoTracking()
-                .FirstOrDefaultAsync(it => it.UserId == userId);
+                .FirstOrDefaultAsync(it => it.UserId == userId, cancellationToken);
 
             return accountModel == null ? false : true;
         }
@@ -62,7 +62,7 @@ namespace Minibank.Data.BankAccounts.Repositories
                 CurrencyCode = currencyCode,
                 OpeningDate = DateTime.Now,
                 Amount = 1000
-            });
+            }, cancellationToken);
 
             return id;
         }
@@ -71,7 +71,7 @@ namespace Minibank.Data.BankAccounts.Repositories
             BankAccount bankAccount, CancellationToken cancellationToken)
         {
             var oldAccountModel = await context.BancAccounts
-                .FirstOrDefaultAsync(it => it.Id == bankAccount.Id);
+                .FirstOrDefaultAsync(it => it.Id == bankAccount.Id, cancellationToken);
 
             if (oldAccountModel != null)
             {

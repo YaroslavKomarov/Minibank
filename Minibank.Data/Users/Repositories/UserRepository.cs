@@ -18,7 +18,8 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task<bool> DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
         {
-            var userModel = await context.Users.FirstOrDefaultAsync(it => it.Id == id);
+            var userModel = await context.Users
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
             
             if (userModel != null)
             {
@@ -34,7 +35,7 @@ namespace Minibank.Data.Users.Repositories
         {
             var userModel = await context.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(it => it.Id == id);
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
             if (userModel == null)
             {
@@ -58,14 +59,15 @@ namespace Minibank.Data.Users.Repositories
                 Id = id,
                 Login = user.Login,
                 Email = user.Email
-            });
+            }, cancellationToken);
 
             return id;
         }
 
         public async Task<bool> UpdateUserAsync(User user, CancellationToken cancellationToken)
         {
-            var oldUserModel = await context.Users.FirstOrDefaultAsync(it => it.Id == user.Id);
+            var oldUserModel = await context.Users
+                .FirstOrDefaultAsync(it => it.Id == user.Id, cancellationToken);
 
             if (oldUserModel != null)
             {
@@ -80,7 +82,10 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task<bool> CheckIsLoginUniqueAsync(string login, CancellationToken cancellationToken)
         {
-            if (await context.Users.FirstOrDefaultAsync(it => it.Login == login) != null)
+            var userModel = await context.Users
+                .FirstOrDefaultAsync(it => it.Login == login, cancellationToken);
+
+            if (userModel != null)
             {
                 return false;
             }
@@ -90,7 +95,10 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task<bool> CheckIsEmailUniqueAsync(string email, CancellationToken cancellationToken)
         {
-            if (await context.Users.FirstOrDefaultAsync(it => it.Email == email) != null)
+            var userModel = await context.Users
+                .FirstOrDefaultAsync(it => it.Email == email, cancellationToken);
+
+            if (userModel != null)
             {
                 return false;
             }

@@ -25,6 +25,10 @@ namespace Minibank.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder
+                .UseNpgsql()
+                .UseSnakeCaseNamingConvention();
+
             optionsBuilder.LogTo(Console.WriteLine);
             base.OnConfiguring(optionsBuilder); 
         }

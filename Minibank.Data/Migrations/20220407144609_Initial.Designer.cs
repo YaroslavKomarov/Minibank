@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Minibank.Data.Migrations
 {
     [DbContext(typeof(MinibankContext))]
-    [Migration("20220403184029_Initial")]
+    [Migration("20220407144609_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,7 +53,8 @@ namespace Minibank.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("user_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_banc_accounts");
 
                     b.ToTable("bank_account");
                 });
@@ -83,7 +84,8 @@ namespace Minibank.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("to_account_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_money_transfer_histories");
 
                     b.ToTable("money_transfer_history");
                 });
@@ -106,9 +108,10 @@ namespace Minibank.Data.Migrations
                         .HasColumnType("character varying(29)")
                         .HasColumnName("login");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_users");
 
-                    b.ToTable("users");
+                    b.ToTable("user");
                 });
 #pragma warning restore 612, 618
         }

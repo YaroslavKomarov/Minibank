@@ -1,5 +1,6 @@
 ﻿using Minibank.Core.Domain.Exceptions;
 using Minibank.Core.Domain.Currency;
+using System.Threading.Tasks;
 using System.Threading;
 using System;
 
@@ -7,71 +8,53 @@ namespace Minibank.Core.Services
 {
     public class CurrencyConverterService : ICurrencyConverterService
     {
-        private static readonly ValidCurrencies mainCurrencyCode = ValidCurrencies.RUB;
+        private static readonly ValidCurrencies mainCurrency = ValidCurrencies.RUB;
 
-        private readonly ICurrencyRateService currencyRate;
+        private readonly ICurrencyRateService currencyRateService;
 
-        public CurrencyConverterService(ICurrencyRateService currencyRate)
+        public CurrencyConverterService(ICurrencyRateService currencyRateService)
         {
-            this.currencyRate = currencyRate;
+            this.currencyRateService = currencyRateService;
         }
   
-        public decimal Convert(
+        public async Task<decimal> Convert(
             decimal? amount,
             string fromCurrency,
             string toCurrency, 
             CancellationToken cancellationToken)
         {
-            ValidateArguments(amount, fromCurrency, toCurrency);
-            var validAmount = (decimal)amount;
+            var validAmount = ValidateArguments(amount, fromCurrency, toCurrency);
 
             if (fromCurrency == toCurrency)
             {
                 return Math.Round(validAmount, 2);
             }
-            else if (fromCurrency == mainCurrencyCode.ToString() && toCurrency != mainCurrencyCode.ToString())
+            else if (fromCurrency == mainCurrency.ToString() && toCurrency != mainCurrency.ToString())
             {
-                return ConvertFromMainCurrency(validAmount, toCurrency, cancellationToken);
+                var rate = await currencyRateService.GetCurrencyRate(
+                    toCurrency, cancellationToken);
+
+                return Math.Round(validAmount / rate, 2);
             }
-            else if (fromCurrency != mainCurrencyCode.ToString() && toCurrency != mainCurrencyCode.ToString())
+            else if (fromCurrency != mainCurrency.ToString() && toCurrency != mainCurrency.ToString())
             {
-                return ConvertBothNonMainCurrencies(validAmount, fromCurrency, toCurrency, cancellationToken);
+                var fromRate = await currencyRateService.GetCurrencyRate(
+                    fromCurrency, cancellationToken);
+                var toRate = await currencyRateService.GetCurrencyRate(
+                    toCurrency, cancellationToken);
+
+                return Math.Round((validAmount * fromRate) / toRate, 2);
             }
             else
             {
-                return ConvertToMainCurrency(validAmount, fromCurrency, cancellationToken);
+                var rate = await currencyRateService.GetCurrencyRate(
+                    fromCurrency, cancellationToken);
+
+                return Math.Round(validAmount * rate, 2);
             }
         }
 
-        private decimal ConvertFromMainCurrency(
-            decimal amount, 
-            string toCurrency, 
-            CancellationToken cancellationToken)
-        {
-            var currencyAmount = amount / currencyRate.GetCurrencyRate(toCurrency, cancellationToken);
-            return Math.Round(currencyAmount, 2);
-        }
-
-        private decimal ConvertBothNonMainCurrencies(
-            decimal amount, 
-            string fromCurrency, 
-            string toCurrency, 
-            CancellationToken cancellationToken)
-        {
-            var mainCurrencyAmount = amount * currencyRate.GetCurrencyRate(fromCurrency, cancellationToken);
-            return ConvertFromMainCurrency(mainCurrencyAmount, toCurrency, cancellationToken);
-        }
-
-        private decimal ConvertToMainCurrency(
-            decimal amount, 
-            string fromCurrency, 
-            CancellationToken cancellationToken)
-        {
-            var currencyAmount = amount * currencyRate.GetCurrencyRate(fromCurrency, cancellationToken);
-            return Math.Round(currencyAmount, 2);
-        }
-
-        private static void ValidateArguments(decimal? amount, string fromCurrency, string toCurrency)
+        private static decimal ValidateArguments(decimal? amount, string fromCurrency, string toCurrency)
         {
             if (amount == null || amount < 0
                 || string.IsNullOrWhiteSpace(toCurrency)
@@ -79,6 +62,8 @@ namespace Minibank.Core.Services
             {
                 throw new ValidationException("Сумма недействительна или валютный(ые) код(ы) пуст(ы)");
             }
+
+            return (decimal)amount;
         }
     }
 }

@@ -1,7 +1,8 @@
-﻿using System.Net.Http;
+﻿using System.Threading.Tasks;
+using Minibank.Core.Services;
 using System.Net.Http.Json;
 using System.Threading;
-using Minibank.Core.Services;
+using System.Net.Http;
 
 namespace Minibank.Data.Currency.Services
 {
@@ -14,10 +15,10 @@ namespace Minibank.Data.Currency.Services
             this.httpClient = httpClient;
         }
 
-        public decimal GetCurrencyRate(string currencyCode, CancellationToken cancellationToken)
+        public async Task<decimal> GetCurrencyRate(string currencyCode, CancellationToken cancellationToken)
         {
-            var response = httpClient.GetFromJsonAsync<CurrencyRateResponse>("daily_json.js")
-                 .GetAwaiter().GetResult();
+            var response = await httpClient
+                .GetFromJsonAsync<CurrencyRateResponse>("daily_json.js", cancellationToken);
 
             return response.Valute[currencyCode].Value;
         }

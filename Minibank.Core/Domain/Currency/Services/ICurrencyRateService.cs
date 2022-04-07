@@ -1,10 +1,11 @@
-﻿using System.Threading;
+﻿using System.Threading.Tasks;
+using System.Threading;
 
 namespace Minibank.Core.Services
 {
     public interface ICurrencyRateService
     {
-        public decimal GetCurrencyRate(string currencyCode, CancellationToken cancellationToken);
+        public Task<decimal> GetCurrencyRate(string currencyCode, CancellationToken cancellationToken);
     }
 }
 

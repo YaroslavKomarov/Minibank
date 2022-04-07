@@ -28,7 +28,8 @@ namespace Minibank.Data.MoneyTransfersHistory.Repositories
                 ToAccountId = history.ToAccountId
             };
 
-            await context.MoneyTransferHistories.AddAsync(moneyTransferHistoryModel);
+            await context.MoneyTransferHistories
+                .AddAsync(moneyTransferHistoryModel, cancellationToken);
         }
     }
 }

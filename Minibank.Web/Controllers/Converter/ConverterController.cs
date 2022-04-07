@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Minibank.Core.Services;
+using System.Threading.Tasks;
 using System.Threading;
 
 namespace Minibank.Web.Controllers.Converter
@@ -16,13 +17,13 @@ namespace Minibank.Web.Controllers.Converter
         }
 
         [HttpGet]
-        public decimal Convert(
+        public async Task<decimal> Convert(
             decimal? amount,
             string fromCurrency,
             string toCurrency,
             CancellationToken cancellationToken)
         {
-            return converter.Convert(amount, fromCurrency, toCurrency, cancellationToken);
+            return await converter.Convert(amount, fromCurrency, toCurrency, cancellationToken);
         }
     }
 }

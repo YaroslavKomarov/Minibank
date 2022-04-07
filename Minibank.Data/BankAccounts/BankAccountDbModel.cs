@@ -20,32 +20,26 @@ namespace Minibank.Data.BankAccounts
             {
                 builder.ToTable("bank_account");
 
-                builder.Property(it => it.Id)
-                    .HasColumnName("id");
+                builder.Property(it => it.Id);
+
                 builder.HasKey(it => it.Id);
 
                 builder.Property(it => it.UserId)
-                    .HasColumnName("user_id")
                     .IsRequired();
 
                 builder.Property(it => it.Amount)
-                    .HasColumnName("amount")
                     .IsRequired();
 
                 builder.Property(it => it.CurrencyCode)
-                    .HasColumnName("currency_code")
                     .IsRequired();
 
                 builder.Property(it => it.OpeningDate)
-                    .HasColumnName("opening_date")
                     .IsRequired();
 
                 builder.Property(it => it.ClosingDate)
-                    .HasColumnName("closing_date")
                     .IsRequired();
 
                 builder.Property(it => it.IsClosed)
-                    .HasColumnName("is_closed")
                     .IsRequired();
             }
         }

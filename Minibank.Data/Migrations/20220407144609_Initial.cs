@@ -21,7 +21,7 @@ namespace Minibank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_bank_account", x => x.id);
+                    table.PrimaryKey("pk_banc_accounts", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -36,11 +36,11 @@ namespace Minibank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_money_transfer_history", x => x.id);
+                    table.PrimaryKey("pk_money_transfer_histories", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "users",
+                name: "user",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "text", nullable: false),
@@ -49,7 +49,7 @@ namespace Minibank.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_users", x => x.id);
+                    table.PrimaryKey("pk_users", x => x.id);
                 });
         }
 
@@ -62,7 +62,7 @@ namespace Minibank.Data.Migrations
                 name: "money_transfer_history");
 
             migrationBuilder.DropTable(
-                name: "users");
+                name: "user");
         }
     }
 }
