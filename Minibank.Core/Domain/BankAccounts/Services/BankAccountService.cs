@@ -180,7 +180,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             CancellationToken cancellationToken)
         {
             var amountWithoutCommission = initialAmount - initialCommission;
-            var transferAmount = GetMoneyInNewCurrency(
+            var transferAmount = await GetMoneyInNewCurrency(
                 amountWithoutCommission, 
                 source.CurrencyCode, 
                 destination.CurrencyCode,
@@ -193,7 +193,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             }
         }
 
-        private decimal GetMoneyInNewCurrency(
+        private async Task<decimal> GetMoneyInNewCurrency(
             decimal amount, 
             string fromCurrency, 
             string toCurrency,
@@ -201,7 +201,11 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         {
             if (fromCurrency != toCurrency)
             {
-                return converter.Convert(amount, fromCurrency, toCurrency, cancellationToken);
+                return await converter.Convert(
+                    amount, 
+                    fromCurrency, 
+                    toCurrency, 
+                    cancellationToken);
             }
 
             return amount;
