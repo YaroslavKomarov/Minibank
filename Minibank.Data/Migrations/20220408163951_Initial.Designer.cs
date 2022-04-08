@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Minibank.Data.Migrations
 {
     [DbContext(typeof(MinibankContext))]
-    [Migration("20220407144609_Initial")]
+    [Migration("20220408163951_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

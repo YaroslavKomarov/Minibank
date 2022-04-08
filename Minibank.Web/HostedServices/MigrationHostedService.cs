@@ -21,14 +21,14 @@ namespace Minibank.Web.HostedServices
         {
             using (var scope = serviceProvider.CreateScope())
             {
-                var contex = scope.ServiceProvider.GetService<MinibankContext>();
+                var context = scope.ServiceProvider.GetService<MinibankContext>();
 
-                if (contex == null)
+                if (context == null)
                 {
                     throw new InvalidOperationException();
                 }
 
-                contex.Database.Migrate();
+                context.Database.Migrate();
             }
 
             return Task.CompletedTask;

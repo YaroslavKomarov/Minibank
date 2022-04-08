@@ -17,7 +17,7 @@ namespace Minibank.Core
 
             services.AddScoped<IUserService, UserService>();
 
-            services.AddFluentValidation().AddValidatorsFromAssembly(typeof(UserService).Assembly);
+            services.AddFluentValidation().AddValidatorsFromAssembly(typeof(Bootstrapper).Assembly);
 
             return services;
         }

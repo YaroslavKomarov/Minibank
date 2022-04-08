@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using Minibank.Core.Domain.Exceptions;
+using System.Threading.Tasks;
 using Minibank.Core.Services;
 using System.Net.Http.Json;
 using System.Threading;
@@ -17,10 +18,21 @@ namespace Minibank.Data.Currency.Services
 
         public async Task<decimal> GetCurrencyRate(string currencyCode, CancellationToken cancellationToken)
         {
-            var response = await httpClient
-                .GetFromJsonAsync<CurrencyRateResponse>("daily_json.js", cancellationToken);
+            try
+            {
+                var response = await httpClient
+                    .GetFromJsonAsync<CurrencyRateResponse>("daily_json.js", cancellationToken);
 
-            return response.Valute[currencyCode].Value;
+                return response.Valute[currencyCode].Value;
+            }
+            catch (HttpRequestException ex)
+            {
+                if (ex.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                {
+                    throw new ValidationException("Не удалось получить доступ к сервису, повторите попытку позже");
+                }
+                throw new ValidationException("Запршиваемый сервис недоступен");
+            }
         }
     }
 }

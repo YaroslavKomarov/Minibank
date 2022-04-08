@@ -36,9 +36,6 @@ namespace Minibank.Data.BankAccounts
                 builder.Property(it => it.OpeningDate)
                     .IsRequired();
 
-                builder.Property(it => it.ClosingDate)
-                    .IsRequired();
-
                 builder.Property(it => it.IsClosed)
                     .IsRequired();
             }

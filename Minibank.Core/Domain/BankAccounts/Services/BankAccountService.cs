@@ -3,6 +3,7 @@ using Minibank.Core.Domains.MoneyTransfersHistory.Repositories;
 using Minibank.Core.Domains.BankAccounts.Repositories;
 using Minibank.Core.Domains.MoneyTransfersHistory;
 using Minibank.Core.Domains.Users.Repositories;
+using Minibank.Core.Domain.Exceptions;
 using Minibank.Core.Domain.Currency;
 using Minibank.Core.Domains.Users;
 using System.Threading.Tasks;
@@ -10,7 +11,6 @@ using Minibank.Core.Services;
 using FluentValidation;
 using System.Threading;
 using System;
-using Minibank.Core.Domain.Exceptions;
 
 namespace Minibank.Core.Domains.BankAccounts.Services
 {
@@ -30,7 +30,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
 
         private readonly ICurrencyConverterService converter;
 
-        private static readonly int commissionPercentage = 2;
+        private const int commissionPercentage = 2;
 
         public BankAccountService(
             IUnitOfWork unitOfWork,
@@ -57,7 +57,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
 
             account.IsClosed = true;
             account.ClosingDate = DateTime.Now;
-
+            
             if (!await accountRepository.UpdateBankAccountAsync(account, cancellationToken))
             {
                 throw new ValidationException("Банковский аккаунт с переданным идентификатором не существует");
@@ -87,16 +87,16 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         {
             userValidator.ValidateAndThrow(await userRepository.GetUserByIdAsync(userId, cancellationToken));
 
-            if (!Enum.IsDefined(typeof(ValidCurrencies), currencyCode))
+            if (!Enum.IsDefined(typeof(ValidCurrencies), currencyCode.ToUpperInvariant()))
             {
                 throw new ValidationException($"{currencyCode} - Недопустимый валютный код");
             }
 
-            var accuntId = await accountRepository.CreateBankAccountAsync(
+            var accountId = await accountRepository.CreateBankAccountAsync(
                 userId, currencyCode, cancellationToken);
 
-            unitOfWork.SaveChanges();
-            return accuntId;
+            await unitOfWork.SaveChangesAsync();
+            return accountId;
         }
 
         public async Task UpdateFundsTransferAsync(
@@ -107,6 +107,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         {
             var source = await accountRepository.GetBankAccountByIdAsync(fromAccountId, cancellationToken);
             var destination = await accountRepository.GetBankAccountByIdAsync(toAccountId, cancellationToken);
+
             var validAmount = ValidateTransferDataAndThrow(source, destination, amount);
             var commission = CalculateTransferCommission(source, destination, validAmount);
 
@@ -120,10 +121,10 @@ namespace Minibank.Core.Domains.BankAccounts.Services
                 Amount = validAmount,
                 FromAccountId = fromAccountId,
                 ToAccountId = toAccountId,
-                CurrencyCode = destination.CurrencyCode
+                CurrencyCode = source.CurrencyCode
             }, cancellationToken);
 
-            unitOfWork.SaveChanges();
+            await unitOfWork.SaveChangesAsync();
         }
 
         private decimal ValidateTransferDataAndThrow(
@@ -132,12 +133,12 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             bankAccountValidator.ValidateAndThrow(source);
             bankAccountValidator.ValidateAndThrow(destination);
 
-            if (amount == null)
+            if (!amount.HasValue)
             {
-                throw new ValidationException("Передана пустая сумма");
+                throw new ValidationException("Сумма не передана");
             }
 
-            return (decimal)amount;
+            return amount.Value;
         }
 
         private decimal CalculateTransferCommission(

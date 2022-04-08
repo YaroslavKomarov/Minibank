@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using Minibank.Core.Domain.BankAccounts;
 
 namespace Minibank.Data.BankAccounts.Repositories
 {
@@ -40,31 +41,27 @@ namespace Minibank.Data.BankAccounts.Repositories
             };
         }
 
-        public async Task<bool> CheckIsBankAccountByUserIdExistAsync(
+        public async Task<bool> CheckDoesNotBankAccountExistByUserIdAsync(
             string userId, CancellationToken cancellationToken)
         {
-            var accountModel = await context.BancAccounts
+            return !await context.BancAccounts
                 .AsNoTracking()
-                .FirstOrDefaultAsync(it => it.UserId == userId, cancellationToken);
-
-            return accountModel == null ? false : true;
+                .AnyAsync(it => it.UserId == userId, cancellationToken);
         }
 
         public async Task<string> CreateBankAccountAsync(
             string userId, string currencyCode, CancellationToken cancellationToken)
         {
-            var id = Guid.NewGuid().ToString();
-
-            await context.BancAccounts.AddAsync(new BankAccountDbModel
+            var entry = await context.BancAccounts.AddAsync(new BankAccountDbModel
             {
-                Id = id,
+                Id = Guid.NewGuid().ToString(),
                 UserId = userId,
-                CurrencyCode = currencyCode,
+                CurrencyCode = currencyCode.ToUpperInvariant(),
                 OpeningDate = DateTime.Now,
                 Amount = 1000
             }, cancellationToken);
 
-            return id;
+            return entry.Entity.Id;
         }
 
         public async Task<bool> UpdateBankAccountAsync(
@@ -75,15 +72,10 @@ namespace Minibank.Data.BankAccounts.Repositories
 
             if (oldAccountModel != null)
             {
-                oldAccountModel.UserId = bankAccount.UserId;
-                oldAccountModel.Amount = bankAccount.Amount;
-                oldAccountModel.CurrencyCode = bankAccount.CurrencyCode;
-                oldAccountModel.OpeningDate = bankAccount.OpeningDate;
-                oldAccountModel.ClosingDate = bankAccount.ClosingDate;
-                oldAccountModel.IsClosed = bankAccount.IsClosed;
+                context.Entry(oldAccountModel).CurrentValues.SetValues(bankAccount);
 
                 return true;
-            }
+            } 
 
             return false;
         }

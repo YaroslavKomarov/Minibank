@@ -34,34 +34,23 @@ namespace Minibank.Core.Domains.Users.Services
         {
             userValidator.ValidateAndThrow(user, options => options.IncludeRuleSets("Create"));
 
-            if (!await userRepository.CheckIsLoginUniqueAsync(user.Login, cancellationToken))
-            {
-                throw new ValidationException("Пользователь с таким логином уже зарегистрирован");
-            }
-
-            if (!await userRepository.CheckIsEmailUniqueAsync(user.Email, cancellationToken))
-            {
-                throw new ValidationException("Пользователь с такой почтой уже зарегистрирован");
-            }
-
             var userId = await userRepository.CreateUserAsync(user, cancellationToken);
-            unitOfWork.SaveChanges();
+            await unitOfWork.SaveChangesAsync();
             return userId;
         }
 
         public async Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
         {
-            if (await accountRepository.CheckIsBankAccountByUserIdExistAsync(id, cancellationToken))
-            {
-                throw new ValidationException("Невозможно удалить пользователя с открытым аккаунтом");
-            }
+            userValidator.ValidateAndThrow(
+                new User { Id = id },
+                options => options.IncludeRuleSets("Delete"));
 
             if (!await userRepository.DeleteUserByIdAsync(id, cancellationToken))
             {
                 throw new ValidationException("Пользователь с переданным идентификатором не существует");
             }
 
-            unitOfWork.SaveChanges();
+            await unitOfWork.SaveChangesAsync();
         }
 
         public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)
@@ -71,7 +60,7 @@ namespace Minibank.Core.Domains.Users.Services
                 throw new ValidationException("Пользователь с переданным идентификатором не существует");
             }
 
-            unitOfWork.SaveChanges();
+            await unitOfWork.SaveChangesAsync();
         }
     }
 }

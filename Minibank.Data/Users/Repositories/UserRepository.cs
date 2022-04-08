@@ -71,8 +71,7 @@ namespace Minibank.Data.Users.Repositories
 
             if (oldUserModel != null)
             {
-                oldUserModel.Login = user.Login;
-                oldUserModel.Email = user.Email;
+                context.Entry(oldUserModel).CurrentValues.SetValues(user);
 
                 return true;
             }
@@ -82,28 +81,16 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task<bool> CheckIsLoginUniqueAsync(string login, CancellationToken cancellationToken)
         {
-            var userModel = await context.Users
-                .FirstOrDefaultAsync(it => it.Login == login, cancellationToken);
-
-            if (userModel != null)
-            {
-                return false;
-            }
-
-            return true;
+            return !await context.Users
+                .AsNoTracking()
+                .AnyAsync(it => it.Login == login, cancellationToken);
         }
 
         public async Task<bool> CheckIsEmailUniqueAsync(string email, CancellationToken cancellationToken)
         {
-            var userModel = await context.Users
-                .FirstOrDefaultAsync(it => it.Email == email, cancellationToken);
-
-            if (userModel != null)
-            {
-                return false;
-            }
-
-            return true;
+            return !await context.Users
+                .AsNoTracking()
+                .AnyAsync(it => it.Email == email, cancellationToken);
         }
     }
 }

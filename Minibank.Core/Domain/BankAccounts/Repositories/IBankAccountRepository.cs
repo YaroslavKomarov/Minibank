@@ -7,7 +7,7 @@ namespace Minibank.Core.Domains.BankAccounts.Repositories
     {
         Task<BankAccount> GetBankAccountByIdAsync(string id, CancellationToken cancellation);
         Task<bool> UpdateBankAccountAsync(BankAccount bankAccount, CancellationToken cancellation);
-        Task<bool> CheckIsBankAccountByUserIdExistAsync(string userId, CancellationToken cancellation);
+        Task<bool> CheckDoesNotBankAccountExistByUserIdAsync(string userId, CancellationToken cancellation);
         Task<string> CreateBankAccountAsync(string userId, string currencyCode, CancellationToken cancellation);
     }
 }

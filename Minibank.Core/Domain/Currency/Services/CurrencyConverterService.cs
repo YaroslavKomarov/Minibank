@@ -1,8 +1,8 @@
-﻿using Minibank.Core.Domain.Exceptions;
-using Minibank.Core.Domain.Currency;
+﻿using Minibank.Core.Domain.Currency;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using FluentValidation;
 
 namespace Minibank.Core.Services
 {
@@ -10,11 +10,16 @@ namespace Minibank.Core.Services
     {
         private static readonly ValidCurrencies mainCurrency = ValidCurrencies.RUB;
 
+        private readonly IValidator<ConvertCurrencyDto> convertCurrencyValidator;
+
         private readonly ICurrencyRateService currencyRateService;
 
-        public CurrencyConverterService(ICurrencyRateService currencyRateService)
+        public CurrencyConverterService(
+            ICurrencyRateService currencyRateService, 
+            IValidator<ConvertCurrencyDto> convertCurrencyValidator)
         {
             this.currencyRateService = currencyRateService;
+            this.convertCurrencyValidator = convertCurrencyValidator;
         }
   
         public async Task<decimal> Convert(
@@ -23,47 +28,61 @@ namespace Minibank.Core.Services
             string toCurrency, 
             CancellationToken cancellationToken)
         {
-            var validAmount = ValidateArguments(amount, fromCurrency, toCurrency);
-
-            if (fromCurrency == toCurrency)
+            convertCurrencyValidator.ValidateAndThrow(new ConvertCurrencyDto
             {
-                return Math.Round(validAmount, 2);
-            }
-            else if (fromCurrency == mainCurrency.ToString() && toCurrency != mainCurrency.ToString())
-            {
-                var rate = await currencyRateService.GetCurrencyRate(
-                    toCurrency, cancellationToken);
+                Amount = amount,
+                FromCurrency = fromCurrency,
+                ToCurrency = toCurrency
+            });
 
-                return Math.Round(validAmount / rate, 2);
-            }
-            else if (fromCurrency != mainCurrency.ToString() && toCurrency != mainCurrency.ToString())
-            {
-                var fromRate = await currencyRateService.GetCurrencyRate(
-                    fromCurrency, cancellationToken);
-                var toRate = await currencyRateService.GetCurrencyRate(
-                    toCurrency, cancellationToken);
+            fromCurrency = fromCurrency.ToUpperInvariant();
+            toCurrency = toCurrency.ToUpperInvariant();
 
-                return Math.Round((validAmount * fromRate) / toRate, 2);
-            }
-            else
+            return mainCurrency switch
             {
-                var rate = await currencyRateService.GetCurrencyRate(
-                    fromCurrency, cancellationToken);
+                ValidCurrencies.RUB when fromCurrency == toCurrency 
+                    => Math.Round(amount.Value, 2),
 
-                return Math.Round(validAmount * rate, 2);
-            }
+                ValidCurrencies.RUB when fromCurrency == mainCurrency.ToString() && toCurrency != mainCurrency.ToString() 
+                    => await ConvertMainCurrency(amount.Value, toCurrency, cancellationToken),
+
+                ValidCurrencies.RUB when fromCurrency != mainCurrency.ToString() && toCurrency != mainCurrency.ToString()
+                    => await ConvertToMainCurrency(amount.Value, fromCurrency, toCurrency, cancellationToken),
+
+                _ => await ConvertToMainCurrency(amount.Value, fromCurrency, cancellationToken)
+            };
         }
 
-        private static decimal ValidateArguments(decimal? amount, string fromCurrency, string toCurrency)
+        private async Task<decimal> ConvertMainCurrency(
+            decimal amount,
+            string toCurrency,
+            CancellationToken cancellationToken)
         {
-            if (amount == null || amount < 0
-                || string.IsNullOrWhiteSpace(toCurrency)
-                || string.IsNullOrWhiteSpace(fromCurrency))
-            {
-                throw new ValidationException("Сумма недействительна или валютный(ые) код(ы) пуст(ы)");
-            }
+            var rate = await currencyRateService.GetCurrencyRate(toCurrency, cancellationToken);
 
-            return (decimal)amount;
+            return Math.Round(amount / rate, 2);
+        }
+
+        private async Task<decimal> ConvertToMainCurrency(
+            decimal amount,
+            string fromCurrency,
+            CancellationToken cancellationToken)
+        {
+            var rate = await currencyRateService.GetCurrencyRate(fromCurrency, cancellationToken);
+
+            return Math.Round(amount * rate, 2);
+        }
+
+        private async Task<decimal> ConvertToMainCurrency(
+            decimal amount,
+            string fromCurrency,
+            string toCurrency,
+            CancellationToken cancellationToken)
+        {
+            var fromRate = await currencyRateService.GetCurrencyRate(fromCurrency, cancellationToken);
+            var toRate = await currencyRateService.GetCurrencyRate(toCurrency, cancellationToken);
+
+            return Math.Round((amount * fromRate) / toRate, 2);
         }
     }
 }
