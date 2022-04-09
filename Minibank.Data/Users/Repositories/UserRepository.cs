@@ -52,16 +52,14 @@ namespace Minibank.Data.Users.Repositories
 
         public async Task<string> CreateUserAsync(User user, CancellationToken cancellationToken)
         {
-            var id = Guid.NewGuid().ToString();
-
-            await context.Users.AddAsync(new UserDbModel
+            var entry = await context.Users.AddAsync(new UserDbModel
             {
-                Id = id,
+                Id = Guid.NewGuid().ToString(),
                 Login = user.Login,
                 Email = user.Email
             }, cancellationToken);
 
-            return id;
+            return entry.Entity.Id;
         }
 
         public async Task<bool> UpdateUserAsync(User user, CancellationToken cancellationToken)
