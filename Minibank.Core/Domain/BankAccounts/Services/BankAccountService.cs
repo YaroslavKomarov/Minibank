@@ -133,11 +133,10 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             bankAccountValidator.ValidateAndThrow(source);
             bankAccountValidator.ValidateAndThrow(destination);
 
-            if (!amount.HasValue)
+            if (!amount.HasValue || amount.Value < 0)
             {
-                throw new ValidationException("Сумма не передана");
+                throw new ValidationException("Невалидное значение суммы");
             }
-
             return amount.Value;
         }
 
@@ -149,7 +148,6 @@ namespace Minibank.Core.Domains.BankAccounts.Services
                 var commission = amount / 100 * commissionPercentage;
                 return Math.Round(commission, 2);
             }
-
             return 0;
         }
 
@@ -208,7 +206,6 @@ namespace Minibank.Core.Domains.BankAccounts.Services
                     toCurrency, 
                     cancellationToken);
             }
-
             return amount;
         }
     }
