@@ -62,7 +62,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             {
                 throw new ValidationException("Банковский аккаунт с переданным идентификатором не существует");
             }
-            unitOfWork.SaveChanges();
+            await unitOfWork.SaveChangesAsync();
         }
 
         public async Task<string> GetTransferCommissionAsync(

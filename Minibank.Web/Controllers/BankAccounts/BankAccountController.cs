@@ -33,7 +33,7 @@ namespace Minibank.Web.Controllers.BankAccounts
         }
 
         [HttpPost]
-        public async Task<string> CreateBankAccountASync([FromBody] CreateBankAccountDto model, CancellationToken cancellationToken)
+        public async Task<string> CreateBankAccountAsync([FromBody] CreateBankAccountDto model, CancellationToken cancellationToken)
         {
             return await accountService.CreateBankAccountAsync(
                 model.UserId,
