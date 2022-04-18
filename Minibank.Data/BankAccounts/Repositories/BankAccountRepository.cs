@@ -1,18 +1,28 @@
 ﻿using Minibank.Core.Domains.BankAccounts.Repositories;
-using System.Collections.Generic;
-using System;
-using System.Linq;
 using Minibank.Core.Domains.BankAccounts;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using System.Threading;
+using System;
+using Minibank.Core.Domain.BankAccounts;
 
 namespace Minibank.Data.BankAccounts.Repositories
 {
     public class BankAccountRepository : IBankAccountRepository
     {
-        private static List<BankAccountDbModel> bankAccountStorage = new List<BankAccountDbModel>();
+        private readonly MinibankContext context;
 
-        public BankAccount GetBankAccountById(string id)
+        public BankAccountRepository(MinibankContext context)
         {
-            var accountModel = bankAccountStorage.FirstOrDefault(it => it.Id == id);
+            this.context = context;
+        }
+
+        public async Task<BankAccount> GetBankAccountByIdAsync(
+            string id, CancellationToken cancellationToken)
+        {
+            var accountModel = await context.BancAccounts
+                .AsNoTracking()
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
             if (accountModel == null)
             {
@@ -31,47 +41,41 @@ namespace Minibank.Data.BankAccounts.Repositories
             };
         }
 
-        public bool ExistBankAccountByUserId(string userId)
+        public async Task<bool> CheckDoesNotBankAccountExistByUserIdAsync(
+            string userId, CancellationToken cancellationToken)
         {
-            var accountModel = bankAccountStorage.FirstOrDefault(it => it.UserId == userId);
-
-            return accountModel == null ? false : true;
+            return !await context.BancAccounts
+                .AsNoTracking()
+                .AnyAsync(it => it.UserId == userId, cancellationToken);
         }
 
-        public string CreateBankAccount(string userId, string currencyCode)
+        public async Task<string> CreateBankAccountAsync(
+            string userId, string currencyCode, CancellationToken cancellationToken)
         {
-            var id = Guid.NewGuid().ToString();
-
-            bankAccountStorage.Add(new BankAccountDbModel
+            var entry = await context.BancAccounts.AddAsync(new BankAccountDbModel
             {
-                Id = id,
+                Id = Guid.NewGuid().ToString(),
                 UserId = userId,
-                CurrencyCode = currencyCode,
+                CurrencyCode = currencyCode.ToUpperInvariant(),
                 OpeningDate = DateTime.Now,
                 Amount = 1000
-            });
+            }, cancellationToken);
 
-            return id;
+            return entry.Entity.Id;
         }
 
-        public bool UpdateBankAccount(BankAccount bankAccount)
+        public async Task<bool> UpdateBankAccountAsync(
+            BankAccount bankAccount, CancellationToken cancellationToken)
         {
-            var oldAccountModel = bankAccountStorage.FirstOrDefault(it => it.Id == bankAccount.Id);
+            var oldAccountModel = await context.BancAccounts
+                .FirstOrDefaultAsync(it => it.Id == bankAccount.Id, cancellationToken);
 
             if (oldAccountModel != null)
             {
-                bankAccountStorage[bankAccountStorage.IndexOf(oldAccountModel)] = new BankAccountDbModel
-                {
-                    Id = bankAccount.Id,
-                    UserId = bankAccount.UserId,
-                    Amount = bankAccount.Amount,
-                    CurrencyCode = bankAccount.CurrencyCode,
-                    OpeningDate = bankAccount.OpeningDate,
-                    ClosingDate = bankAccount.ClosingDate,
-                    IsClosed = bankAccount.IsClosed
-                };
+                context.Entry(oldAccountModel).CurrentValues.SetValues(bankAccount);
+
                 return true;
-            }
+            } 
 
             return false;
         }

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using System.Threading.Tasks;
+using System.Threading;
 
 namespace Minibank.Core.Domains.Users.Services
 {
     public interface IUserService
     {
-        string CreateUser(User user);
-        void DeleteUserById(string id);
-        void UpdateUser(User user);
+        Task<string> CreateUserAsync(User user, CancellationToken cancellationToken);
+        Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken);
+        Task UpdateUserAsync(User user, CancellationToken cancellationToken);
     }
 }

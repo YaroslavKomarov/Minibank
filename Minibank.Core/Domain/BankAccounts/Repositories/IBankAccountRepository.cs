@@ -1,12 +1,13 @@
-﻿using System;
+﻿using System.Threading.Tasks;
+using System.Threading;
 
 namespace Minibank.Core.Domains.BankAccounts.Repositories
 {
     public interface IBankAccountRepository
     {
-        BankAccount GetBankAccountById(string id);
-        bool UpdateBankAccount(BankAccount bankAccount);
-        bool ExistBankAccountByUserId(string userId);
-        string CreateBankAccount(string userId, string currencyCode);
+        Task<BankAccount> GetBankAccountByIdAsync(string id, CancellationToken cancellation);
+        Task<bool> UpdateBankAccountAsync(BankAccount bankAccount, CancellationToken cancellation);
+        Task<bool> CheckDoesNotBankAccountExistByUserIdAsync(string userId, CancellationToken cancellation);
+        Task<string> CreateBankAccountAsync(string userId, string currencyCode, CancellationToken cancellation);
     }
 }

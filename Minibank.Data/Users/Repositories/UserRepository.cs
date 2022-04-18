@@ -1,30 +1,41 @@
-﻿using Minibank.Core.Domains.Users;
-using Minibank.Core.Domains.Users.Repositories;
+﻿using Minibank.Core.Domains.Users.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Minibank.Core.Domains.Users;
+using System.Threading.Tasks;
+using System.Threading;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Minibank.Data.Users.Repositories
 {
-    internal class UserRepository : IUserRepository
+    public class UserRepository : IUserRepository
     {
-        private static List<UserDbModel> userStorage = new List<UserDbModel>();
+        private readonly MinibankContext context;
 
-        public bool DeleteUserById(string id)
+        public UserRepository(MinibankContext context)
         {
-            var userModel = userStorage.FirstOrDefault(it => it.Id == id);
+            this.context = context;
+        }
+
+        public async Task<bool> DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
+        {
+            var userModel = await context.Users
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
             
             if (userModel != null)
             {
-                return userStorage.Remove(userModel);
+                context.Users.Remove(userModel);
+
+                return true;
             }
 
             return false;
         }
 
-        public User GetUserById(string id)
+        public async Task<User> GetUserByIdAsync(string id, CancellationToken cancellationToken)
         {
-            var userModel = userStorage.FirstOrDefault(it => it.Id == id);
+            var userModel = await context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(it => it.Id == id, cancellationToken);
 
             if (userModel == null)
             {
@@ -39,36 +50,45 @@ namespace Minibank.Data.Users.Repositories
             };
         }
 
-        public string CreateUser(User user)
+        public async Task<string> CreateUserAsync(User user, CancellationToken cancellationToken)
         {
-            var id = Guid.NewGuid().ToString();
-
-            userStorage.Add(new UserDbModel
+            var entry = await context.Users.AddAsync(new UserDbModel
             {
-                Id = id,
+                Id = Guid.NewGuid().ToString(),
                 Login = user.Login,
                 Email = user.Email
-            });
+            }, cancellationToken);
 
-            return id;
+            return entry.Entity.Id;
         }
 
-        public bool UpdateUser(User user)
+        public async Task<bool> UpdateUserAsync(User user, CancellationToken cancellationToken)
         {
-            var oldUserModel = userStorage.FirstOrDefault(it => it.Id == user.Id);
+            var oldUserModel = await context.Users
+                .FirstOrDefaultAsync(it => it.Id == user.Id, cancellationToken);
 
             if (oldUserModel != null)
             {
-                userStorage[userStorage.IndexOf(oldUserModel)] = new UserDbModel
-                {
-                    Id = user.Id,
-                    Login = user.Login,
-                    Email = user.Email
-                };
+                context.Entry(oldUserModel).CurrentValues.SetValues(user);
+
                 return true;
             }
 
             return false;
+        }
+
+        public async Task<bool> CheckIsLoginUniqueAsync(string login, CancellationToken cancellationToken)
+        {
+            return !await context.Users
+                .AsNoTracking()
+                .AnyAsync(it => it.Login == login, cancellationToken);
+        }
+
+        public async Task<bool> CheckIsEmailUniqueAsync(string email, CancellationToken cancellationToken)
+        {
+            return !await context.Users
+                .AsNoTracking()
+                .AnyAsync(it => it.Email == email, cancellationToken);
         }
     }
 }

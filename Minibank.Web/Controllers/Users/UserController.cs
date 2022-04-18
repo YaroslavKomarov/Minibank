@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Minibank.Core.Domains.Users;
-using Minibank.Core.Domains.Users.Services;
+﻿using Minibank.Core.Domains.Users.Services;
 using Minibank.Web.Controllers.Users.DTO;
+using Minibank.Core.Domains.Users;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Minibank.Web.Controllers.Users
 {
@@ -17,30 +19,30 @@ namespace Minibank.Web.Controllers.Users
         }
 
         [HttpPost]
-        public string CreateUser(CreateUserDto model)
+        public async Task<string> CreateUserAsync(CreateUserDto model, CancellationToken cancellationToken)
         {
-            return userService.CreateUser(new User
+            return await userService.CreateUserAsync(new User
             {
                 Login = model.Login,
                 Email = model.Email
-            });
+            }, cancellationToken);
         }
 
         [HttpDelete]
-        public void DeleteUserById(string id)
+        public async Task DeleteUserByIdAsync(string id, CancellationToken cancellationToken)
         {
-            userService.DeleteUserById(id);
+            await userService.DeleteUserByIdAsync(id, cancellationToken);
         }
 
         [HttpPut]
-        public void UpdateUser([FromBody] UserDto model)
+        public async Task UpdateUserAsync([FromBody] UserDto model, CancellationToken cancellationToken)
         {
-            userService.UpdateUser(new User
+            await userService.UpdateUserAsync(new User
             {
                 Id = model.Id,
                 Login = model.Login,
                 Email = model.Email
-            });
+            }, cancellationToken);
         }
     }
 }

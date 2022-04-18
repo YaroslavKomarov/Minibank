@@ -1,12 +1,26 @@
-﻿using System;
+﻿using System.Threading.Tasks;
+using System.Threading;
 
 namespace Minibank.Core.Domains.BankAccounts.Services
 {
     public interface IBankAccountService
     {
-        string CreateBankAccount(string userId, string currencyCode);
-        void CloseBankAccountById(string id);
-        decimal GetTransferCommission(decimal? amount, string fromAccountId, string toAccountId);
-        void UpdateFundsTransfer(decimal? amount, string fromAccountId, string toAccountId);
+        Task<string> CreateBankAccountAsync(
+            string userId,
+            string currencyCode,
+            CancellationToken cancellationToken);
+        Task CloseBankAccountByIdAsync(
+            string id,
+            CancellationToken cancellationToken);
+        Task<string> GetTransferCommissionAsync(
+            decimal? amount,
+            string fromAccountId, 
+            string toAccountId,
+            CancellationToken cancellationToken);
+        Task UpdateFundsTransferAsync(
+            decimal? amount,
+            string fromAccountId, 
+            string toAccountId,
+            CancellationToken cancellationToken);
     }
 }

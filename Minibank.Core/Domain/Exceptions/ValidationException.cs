@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Minibank.Core.Services
+namespace Minibank.Core.Domain.Exceptions
 {
     public class ValidationException : Exception
     {

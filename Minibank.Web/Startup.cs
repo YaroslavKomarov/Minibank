@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Minibank.Core;
 using Minibank.Data;
+using Minibank.Web.HostedServices;
 using Minibank.Web.Middlewares;
 
 namespace Minibank.Web
@@ -24,13 +25,17 @@ namespace Minibank.Web
         {
 
             services.AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Minibank.Web", Version = "v1" });
             });
+
+            services.AddHostedService<MigrationHostedService>();
+
             services
-                .AddData(Configuration)
-                .AddCore();
+                .AddCore()
+                .AddData(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
