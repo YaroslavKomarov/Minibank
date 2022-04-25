@@ -16,7 +16,7 @@ namespace Minibank.Data.Currency.Services
             this.httpClient = httpClient;
         }
 
-        public async Task<decimal> GetCurrencyRate(string currencyCode, CancellationToken cancellationToken)
+        public async Task<decimal> GetCurrencyRateAsync(string currencyCode, CancellationToken cancellationToken)
         {
             try
             {

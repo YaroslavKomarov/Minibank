@@ -21,7 +21,7 @@ namespace Minibank.Core.Domain.Currency.Services
             this.convertCurrencyValidator = convertCurrencyValidator;
         }
   
-        public async Task<decimal> Convert(
+        public async Task<decimal> ConvertAsync(
             decimal? amount,
             string fromCurrency,
             string toCurrency, 
@@ -43,43 +43,43 @@ namespace Minibank.Core.Domain.Currency.Services
                     => Math.Round(amount.Value, 2),
 
                 ValidCurrencies.RUB when fromCurrency == mainCurrency.ToString() && toCurrency != mainCurrency.ToString() 
-                    => await ConvertMainCurrency(amount.Value, toCurrency, cancellationToken),
+                    => await ConvertToCurrency(amount.Value, toCurrency, cancellationToken),
 
                 ValidCurrencies.RUB when fromCurrency != mainCurrency.ToString() && toCurrency != mainCurrency.ToString()
-                    => await ConvertToMainCurrency(amount.Value, fromCurrency, toCurrency, cancellationToken),
+                    => await ConvertBothCurrencies(amount.Value, fromCurrency, toCurrency, cancellationToken),
 
-                _ => await ConvertToMainCurrency(amount.Value, fromCurrency, cancellationToken)
+                _ => await ConvertFromCurrency(amount.Value, fromCurrency, cancellationToken)
             };
         }
 
-        private async Task<decimal> ConvertMainCurrency(
+        private async Task<decimal> ConvertToCurrency(
             decimal amount,
             string toCurrency,
             CancellationToken cancellationToken)
         {
-            var rate = await currencyRateService.GetCurrencyRate(toCurrency, cancellationToken);
+            var rate = await currencyRateService.GetCurrencyRateAsync(toCurrency, cancellationToken);
 
             return Math.Round(amount / rate, 2);
         }
 
-        private async Task<decimal> ConvertToMainCurrency(
+        private async Task<decimal> ConvertFromCurrency(
             decimal amount,
             string fromCurrency,
             CancellationToken cancellationToken)
         {
-            var rate = await currencyRateService.GetCurrencyRate(fromCurrency, cancellationToken);
+            var rate = await currencyRateService.GetCurrencyRateAsync(fromCurrency, cancellationToken);
 
             return Math.Round(amount * rate, 2);
         }
 
-        private async Task<decimal> ConvertToMainCurrency(
+        private async Task<decimal> ConvertBothCurrencies(
             decimal amount,
             string fromCurrency,
             string toCurrency,
             CancellationToken cancellationToken)
         {
-            var fromRate = await currencyRateService.GetCurrencyRate(fromCurrency, cancellationToken);
-            var toRate = await currencyRateService.GetCurrencyRate(toCurrency, cancellationToken);
+            var fromRate = await currencyRateService.GetCurrencyRateAsync(fromCurrency, cancellationToken);
+            var toRate = await currencyRateService.GetCurrencyRateAsync(toCurrency, cancellationToken);
 
             return Math.Round((amount * fromRate) / toRate, 2);
         }

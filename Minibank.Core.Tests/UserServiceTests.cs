@@ -17,33 +17,33 @@ namespace Minibank.Core.Tests
 
         private readonly FluentValidation.IValidator<User> userValidator;
 
-        private readonly Mock<IUnitOfWork> fakeUnitOfWork;
+        private readonly Mock<IUnitOfWork> mockUnitOfWork;
 
-        private readonly Mock<IUserRepository> fakeUserRepository;
+        private readonly Mock<IUserRepository> mockUserRepository;
 
-        private readonly Mock<IBankAccountRepository> fakeBankAccountRepository;
+        private readonly Mock<IBankAccountRepository> mockBankAccountRepository;
 
         public UserServiceTests()
         {
-            fakeUnitOfWork = new Mock<IUnitOfWork>();
-            fakeUserRepository = new Mock<IUserRepository>();
-            fakeBankAccountRepository = new Mock<IBankAccountRepository>();
+            mockUnitOfWork = new Mock<IUnitOfWork>();
+            mockUserRepository = new Mock<IUserRepository>();
+            mockBankAccountRepository = new Mock<IBankAccountRepository>();
 
-            userValidator = new UserValidator(fakeUserRepository.Object, fakeBankAccountRepository.Object);
+            userValidator = new UserValidator(mockUserRepository.Object, mockBankAccountRepository.Object);
 
-            userService = new UserService(fakeUnitOfWork.Object, fakeUserRepository.Object, userValidator);
+            userService = new UserService(mockUnitOfWork.Object, mockUserRepository.Object, userValidator);
         }
 
         private void ConfigureValidatorDependencies(bool isLoginUnique, bool isEmailUnique, bool doesAccountExist)
         {
-            fakeUserRepository
+            mockUserRepository
                 .Setup(repository => repository.CheckIsLoginUniqueAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(isLoginUnique);
-            fakeUserRepository
+            mockUserRepository
                 .Setup(repository => repository.CheckIsEmailUniqueAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(isEmailUnique);
 
-            fakeBankAccountRepository
+            mockBankAccountRepository
                .Setup(repository => repository.CheckDoesNotBankAccountExistByUserIdAsync(It.IsAny<string>(), CancellationToken.None))
                .ReturnsAsync(doesAccountExist);
         }
@@ -207,7 +207,7 @@ namespace Minibank.Core.Tests
 
             var expectedId = "id";
 
-            fakeUserRepository
+            mockUserRepository
                 .Setup(repository => repository.CreateUserAsync(It.IsAny<User>(), CancellationToken.None))
                 .ReturnsAsync(expectedId);
 
@@ -237,7 +237,7 @@ namespace Minibank.Core.Tests
             // ARRANGE
             ConfigureValidatorDependencies(true, true, true);
 
-            fakeUserRepository
+            mockUserRepository
                 .Setup(repository => repository.DeleteUserByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(false);
 
@@ -256,7 +256,7 @@ namespace Minibank.Core.Tests
             // ARRANGE
             ConfigureValidatorDependencies(true, true, true);
 
-            fakeUserRepository
+            mockUserRepository
                 .Setup(repository => repository.UpdateUserAsync(It.IsAny<User>(), CancellationToken.None))
                 .ReturnsAsync(false);
 

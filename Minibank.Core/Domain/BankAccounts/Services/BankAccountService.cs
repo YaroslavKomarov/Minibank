@@ -205,7 +205,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
         {
             if (fromCurrency != toCurrency)
             {
-                return await converter.Convert(
+                return await converter.ConvertAsync(
                     amount, 
                     fromCurrency, 
                     toCurrency, 

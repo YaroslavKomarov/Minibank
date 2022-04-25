@@ -25,40 +25,40 @@ namespace Minibank.Core.Tests
 
         private readonly FluentValidation.IValidator<BankAccount> bankAccountValidator;
 
-        private readonly Mock<IUnitOfWork> fakeUnitOfWork;
+        private readonly Mock<IUnitOfWork> mockUnitOfWork;
 
-        private readonly Mock<IUserRepository> fakeUserRepository;
+        private readonly Mock<IUserRepository> mockUserRepository;
 
-        private readonly Mock<IDateTimeProvider> fakeDateTimeProvider;
+        private readonly Mock<IDateTimeProvider> mockDateTimeProvider;
 
-        private readonly Mock<ICurrencyConverterService> fakeConverter;
+        private readonly Mock<ICurrencyConverterService> mockConverter;
 
-        private readonly Mock<IBankAccountRepository> fakeBankAccountRepository;
+        private readonly Mock<IBankAccountRepository> mockBankAccountRepository;
 
-        private readonly Mock<IMoneyTransferHistoryRepository> fakeMoneyTransferHistoryRepository;
+        private readonly Mock<IMoneyTransferHistoryRepository> mockMoneyTransferHistoryRepository;
 
         public BankAccountServiceTests()
         {
-            fakeUnitOfWork = new Mock<IUnitOfWork>();
-            fakeUserRepository = new Mock<IUserRepository>();
-            fakeDateTimeProvider = new Mock<IDateTimeProvider>();
-            fakeConverter = new Mock<ICurrencyConverterService>();
-            fakeBankAccountRepository = new Mock<IBankAccountRepository>();
-            fakeMoneyTransferHistoryRepository = new Mock<IMoneyTransferHistoryRepository>();
+            mockUnitOfWork = new Mock<IUnitOfWork>();
+            mockUserRepository = new Mock<IUserRepository>();
+            mockDateTimeProvider = new Mock<IDateTimeProvider>();
+            mockConverter = new Mock<ICurrencyConverterService>();
+            mockBankAccountRepository = new Mock<IBankAccountRepository>();
+            mockMoneyTransferHistoryRepository = new Mock<IMoneyTransferHistoryRepository>();
 
             bankAccountValidator = new BankAccountValidator();
             
-            userValidator = new UserValidator(fakeUserRepository.Object, fakeBankAccountRepository.Object);
+            userValidator = new UserValidator(mockUserRepository.Object, mockBankAccountRepository.Object);
 
             bankAccountService = new BankAccountService(
-               fakeUnitOfWork.Object,
-               fakeDateTimeProvider.Object,
+               mockUnitOfWork.Object,
+               mockDateTimeProvider.Object,
                userValidator,
                bankAccountValidator,
-               fakeMoneyTransferHistoryRepository.Object,
-               fakeBankAccountRepository.Object,
-               fakeUserRepository.Object,
-               fakeConverter.Object
+               mockMoneyTransferHistoryRepository.Object,
+               mockBankAccountRepository.Object,
+               mockUserRepository.Object,
+               mockConverter.Object
             );
         }
 
@@ -66,7 +66,7 @@ namespace Minibank.Core.Tests
         public async void CreateBankAccountAsync_WithInvalidUserId_ShouldThrowException()
         {
             // ARRANGE
-            fakeUserRepository
+            mockUserRepository
                 .Setup(repository => repository.GetUserByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync((User)null);
 
@@ -82,7 +82,7 @@ namespace Minibank.Core.Tests
         public async void CreateBankAccountAsync_WithInvalidCurrencyCode_ShouldThrowException()
         {
             // ARRANGE
-            fakeUserRepository
+            mockUserRepository
                 .Setup(repository => repository.GetUserByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(new User { Id = "", Login = "mock", Email = "mock"});
 
@@ -100,11 +100,11 @@ namespace Minibank.Core.Tests
         public async void CreateBankAccountAsync_WithLowerCurrencyCode_MustNotThrowException()
         {
             // ARRANGE
-            fakeUserRepository
+            mockUserRepository
                 .Setup(repository => repository.GetUserByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(new User { Id = "", Login = "mock", Email = "mock" });
 
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.CreateBankAccountAsync(It.IsAny<string>(), It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync("1");
 
@@ -118,7 +118,7 @@ namespace Minibank.Core.Tests
         public async void CloseBankAccountAsync_WithInvalidAccountId_ShouldThrowException()
         {
             // ARRANGE
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync((BankAccount)null);
 
@@ -134,7 +134,7 @@ namespace Minibank.Core.Tests
         public async void CloseBankAccountAsync_WithNonZeroAmunt_ShouldThrowException()
         {
             // ARRANGE
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(new BankAccount { Amount = 100 });
 
@@ -150,11 +150,11 @@ namespace Minibank.Core.Tests
         public async void CloseBankAccountAsync_WithFailedUpdate_ShouldThrowException()
         {
             // ARRANGE
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.UpdateBankAccountAsync(It.IsAny<BankAccount>(), CancellationToken.None))
                 .ReturnsAsync(false);
 
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(new BankAccount { Amount = 0 });
 
@@ -173,15 +173,15 @@ namespace Minibank.Core.Tests
             var expectedDate = new DateTime(200, 1, 1);
             var expectedAccount = new BankAccount { Amount = 0 };
 
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.UpdateBankAccountAsync(It.IsAny<BankAccount>(), CancellationToken.None))
                 .ReturnsAsync(true);
 
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(expectedAccount);
 
-            fakeDateTimeProvider
+            mockDateTimeProvider
                 .Setup(provider => provider.Now)
                 .Returns(expectedDate);
 
@@ -196,7 +196,7 @@ namespace Minibank.Core.Tests
         public async void GetTransferCommissionAsync_WithInvalidAmount_ShouldThrowException()
         {
             // ARRANGE
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(new BankAccount());
 
@@ -214,7 +214,7 @@ namespace Minibank.Core.Tests
         public async void GetTransferCommissionAsync_WithInvalidIdStrings_ShouldThrowException()
         {
             // ARRANGE
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync((BankAccount)null);
 
@@ -232,7 +232,7 @@ namespace Minibank.Core.Tests
         public async void GetTransferCommissionAsync_WithEqualUserId_ShouldReturnZeroCommission()
         {
             // ARRANGE
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(new BankAccount { UserId = "id", CurrencyCode = "RUB" });
 
@@ -250,7 +250,7 @@ namespace Minibank.Core.Tests
         public async void GetTransferCommissionAsync_WithDifferentUserId_ShouldReturnCommission()
         {
             // ARRANGE
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .SetupSequence(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(new BankAccount { UserId = "id1", CurrencyCode = "RUB" })
                 .ReturnsAsync(new BankAccount { UserId = "id2", CurrencyCode = "RUB" });
@@ -268,7 +268,7 @@ namespace Minibank.Core.Tests
         public async void GetTransferCommissionAsync_WithDifferentCurrency_ShouldRoundToHundredths()
         {
             // ARRANGE
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .SetupSequence(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync(new BankAccount { UserId = "id1", CurrencyCode = "RUB" })
                 .ReturnsAsync(new BankAccount { UserId = "id2", CurrencyCode = "RUB" });
@@ -286,7 +286,7 @@ namespace Minibank.Core.Tests
         public async void UpdateFundsTransferAsync_WithInvalidAmount_ShouldThrowException()
         {
             // ARRANGE
-            fakeBankAccountRepository
+            mockBankAccountRepository
                .Setup(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                .ReturnsAsync(new BankAccount());
 
@@ -302,7 +302,7 @@ namespace Minibank.Core.Tests
         public async void UpdateFundsTransferAsync_WithInvalidIdStrings_ShouldThrowException()
         {
             // ARRANGE
-            fakeBankAccountRepository
+            mockBankAccountRepository
                 .Setup(repository => repository.GetBankAccountByIdAsync(It.IsAny<string>(), CancellationToken.None))
                 .ReturnsAsync((BankAccount)null);
 

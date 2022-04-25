@@ -12,18 +12,14 @@ namespace Minibank.Core.Domain.Currency.CurrencyValidators
                 .WithMessage("Передана невалидная сумма");
 
             RuleFor(c => c.FromCurrency)
-                .Must(currency => !string.IsNullOrWhiteSpace(currency))
-                .WithMessage("Валютный код источника пуст");
-            RuleFor(c => c.FromCurrency)
-                .Must(currency => Enum.IsDefined(typeof(ValidCurrencies), currency.ToUpperInvariant()))
-                .WithMessage("Недопустимый валютный код");
+                .NotNull().NotEmpty().WithMessage("Валютный код источника пуст")
+                .Must(currency => string.IsNullOrEmpty(currency) || Enum.IsDefined(typeof(ValidCurrencies), currency.ToUpperInvariant()))
+                .WithMessage("Недопустимый валютный код источника");
 
             RuleFor(c => c.ToCurrency)
-                .Must(currency => !string.IsNullOrWhiteSpace(currency))
-                .WithMessage("Валютный код назначения пуст");
-            RuleFor(c => c.ToCurrency)
-                .Must(currency => Enum.IsDefined(typeof(ValidCurrencies), currency.ToUpperInvariant()))
-                .WithMessage("Недопустимый валютный код");
+                .NotNull().NotEmpty().WithMessage("Валютный код назначения пуст")
+                .Must(currency => string.IsNullOrEmpty(currency) || Enum.IsDefined(typeof(ValidCurrencies), currency.ToUpperInvariant()))
+                .WithMessage("Недопустимый валютный код назначения");
         }
     }
 }

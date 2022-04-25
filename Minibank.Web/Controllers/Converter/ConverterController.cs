@@ -23,7 +23,7 @@ namespace Minibank.Web.Controllers.Converter
             string toCurrency,
             CancellationToken cancellationToken)
         {
-            return await converter.Convert(amount, fromCurrency, toCurrency, cancellationToken);
+            return await converter.ConvertAsync(amount, fromCurrency, toCurrency, cancellationToken);
         }
     }
 }

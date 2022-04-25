@@ -5,7 +5,7 @@ namespace Minibank.Core.Domain.Currency.Services
 {
     public interface ICurrencyConverterService
     {
-        public Task<decimal> Convert(
+        public Task<decimal> ConvertAsync(
             decimal? amount, 
             string fromCurrency, 
             string toCurrency, 
