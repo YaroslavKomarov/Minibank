@@ -1,5 +1,5 @@
-﻿using Minibank.Core.Domains.MoneyTransfersHistory.Repositories;
-using Minibank.Core.Domains.MoneyTransfersHistory;
+﻿using Minibank.Core.Domain.MoneyTransfersHistory.Repositories;
+using Minibank.Core.Domain.MoneyTransfersHistory;
 using System.Threading.Tasks;
 using System.Threading;
 using System;

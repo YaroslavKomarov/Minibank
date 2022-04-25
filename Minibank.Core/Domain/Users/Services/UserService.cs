@@ -1,5 +1,4 @@
 ﻿using ValidationException = Minibank.Core.Domain.Exceptions.ValidationException;
-using Minibank.Core.Domains.BankAccounts.Repositories;
 using Minibank.Core.Domains.Users.Repositories;
 using Minibank.Core.Domain.Exceptions;
 using System.Threading.Tasks;
@@ -16,18 +15,14 @@ namespace Minibank.Core.Domains.Users.Services
 
         private readonly IValidator<User> userValidator;
 
-        private readonly IBankAccountRepository accountRepository;
-
         public UserService(
             IUnitOfWork unitOfWork,
             IUserRepository userRepository,
-            IValidator<User> userValidator,
-            IBankAccountRepository accountRepository)
+            IValidator<User> userValidator)
         {
             this.unitOfWork = unitOfWork;
             this.userRepository = userRepository;
             this.userValidator = userValidator;
-            this.accountRepository = accountRepository;
         }
 
         public async Task<string> CreateUserAsync(User user, CancellationToken cancellationToken)

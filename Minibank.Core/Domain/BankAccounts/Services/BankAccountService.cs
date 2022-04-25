@@ -1,20 +1,21 @@
 ﻿using ValidationException = Minibank.Core.Domain.Exceptions.ValidationException;
-using Minibank.Core.Domains.MoneyTransfersHistory.Repositories;
+using Minibank.Core.Domain.MoneyTransfersHistory.Repositories;
 using Minibank.Core.Domains.BankAccounts.Repositories;
-using Minibank.Core.Domains.MoneyTransfersHistory;
+using Minibank.Core.Domain.BankAccounts.Services;
+using Minibank.Core.Domain.MoneyTransfersHistory;
 using Minibank.Core.Domains.Users.Repositories;
+using Minibank.Core.Domain.Currency.Services;
 using Minibank.Core.Domain.Exceptions;
 using Minibank.Core.Domain.Currency;
 using Minibank.Core.Domains.Users;
 using System.Threading.Tasks;
-using Minibank.Core.Services;
 using FluentValidation;
 using System.Threading;
 using System;
 
 namespace Minibank.Core.Domains.BankAccounts.Services
 {
-    internal class BankAccountService : IBankAccountService
+    public class BankAccountService : IBankAccountService
     {
         private readonly IUnitOfWork unitOfWork;
 
@@ -22,22 +23,25 @@ namespace Minibank.Core.Domains.BankAccounts.Services
 
         private readonly IValidator<BankAccount> bankAccountValidator;
 
-        private readonly IBankAccountRepository accountRepository;
+        private readonly IDateTimeProvider dateTimeProvider;
 
-        private readonly IMoneyTransferHistoryRepository historyRepository;
+        private readonly ICurrencyConverterService converter;
 
         private readonly IUserRepository userRepository;
 
-        private readonly ICurrencyConverterService converter;
+        private readonly IBankAccountRepository accountRepository;
+
+        private readonly IMoneyTransferHistoryRepository historyRepository;
 
         private const int commissionPercentage = 2;
 
         public BankAccountService(
             IUnitOfWork unitOfWork,
+            IDateTimeProvider dateTimeProvider,
             IValidator<User> userValidator,
             IValidator<BankAccount> bankAccountValidator,
             IMoneyTransferHistoryRepository historyRepository,
-            IBankAccountRepository accountRepository, 
+            IBankAccountRepository accountRepository,
             IUserRepository userRepository,
             ICurrencyConverterService converter)
         {
@@ -46,6 +50,7 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             this.bankAccountValidator = bankAccountValidator;
             this.historyRepository = historyRepository;
             this.accountRepository = accountRepository;
+            this.dateTimeProvider = dateTimeProvider;
             this.userRepository = userRepository;
             this.converter = converter;
         }
@@ -56,11 +61,11 @@ namespace Minibank.Core.Domains.BankAccounts.Services
             bankAccountValidator.ValidateAndThrow(account, options => options.IncludeRuleSets("Close"));
 
             account.IsClosed = true;
-            account.ClosingDate = DateTime.Now;
+            account.ClosingDate = dateTimeProvider.Now;
             
             if (!await accountRepository.UpdateBankAccountAsync(account, cancellationToken))
             {
-                throw new ValidationException("Банковский аккаунт с переданным идентификатором не существует");
+                throw new ValidationException("Не удалось закрыть банковский аккаунт");
             }
             await unitOfWork.SaveChangesAsync();
         }

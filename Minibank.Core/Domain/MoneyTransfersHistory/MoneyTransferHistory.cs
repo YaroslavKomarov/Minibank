@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Minibank.Core.Domains.MoneyTransfersHistory
+namespace Minibank.Core.Domain.MoneyTransfersHistory
 {
     public class MoneyTransferHistory
     {

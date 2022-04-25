@@ -1,6 +1,6 @@
-﻿using Minibank.Core.Domain.Exceptions;
+﻿using Minibank.Core.Domain.Currency.Services;
+using Minibank.Core.Domain.Exceptions;
 using System.Threading.Tasks;
-using Minibank.Core.Services;
 using System.Net.Http.Json;
 using System.Threading;
 using System.Net.Http;

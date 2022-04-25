@@ -1,15 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Minibank.Core;
-using Minibank.Core.Domains.BankAccounts.Repositories;
-using Minibank.Core.Domains.MoneyTransfersHistory.Repositories;
-using Minibank.Core.Domains.Users.Repositories;
-using Minibank.Core.Services;
-using Minibank.Data.BankAccounts.Repositories;
-using Minibank.Data.Currency.Services;
+﻿using Minibank.Core.Domain.MoneyTransfersHistory.Repositories;
 using Minibank.Data.MoneyTransfersHistory.Repositories;
+using Minibank.Core.Domains.BankAccounts.Repositories;
+using Microsoft.Extensions.DependencyInjection;
+using Minibank.Core.Domains.Users.Repositories;
+using Minibank.Data.BankAccounts.Repositories;
+using Minibank.Core.Domain.Currency.Services;
+using Microsoft.Extensions.Configuration;
 using Minibank.Data.Users.Repositories;
+using Minibank.Data.Currency.Services;
+using Microsoft.EntityFrameworkCore;
+using Minibank.Core;
 using System;
 
 namespace Minibank.Data

@@ -1,10 +1,9 @@
-﻿using Minibank.Core.Domain.Currency;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using FluentValidation;
 using System.Threading;
 using System;
-using FluentValidation;
 
-namespace Minibank.Core.Services
+namespace Minibank.Core.Domain.Currency.Services
 {
     public class CurrencyConverterService : ICurrencyConverterService
     {

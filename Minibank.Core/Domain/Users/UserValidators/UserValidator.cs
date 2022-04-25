@@ -11,11 +11,11 @@ namespace Minibank.Core.Domain.Users.UserValidators
         {
             RuleSet("Create", () =>
             {
-                RuleFor(u => u.Login).NotEmpty().WithMessage("Login не должен быть пустым");
-                RuleFor(u => u.Email).NotEmpty().WithMessage("Email не должен быть пустым");
+                RuleFor(u => u.Login).NotNull().NotEmpty().WithMessage("Login не должен быть пустым")
+                    .Must(login => string.IsNullOrEmpty(login) || login.Length <= 256).WithMessage("Login не должен превышать 256 символов");
 
-                RuleFor(u => u.Login.Length).LessThanOrEqualTo(256).WithMessage("Login не должен превышать 256 символов");
-                RuleFor(u => u.Email.Length).LessThanOrEqualTo(256).WithMessage("Email не должен превышать 256 символов");
+                RuleFor(u => u.Email).NotNull().NotEmpty().WithMessage("Email не должен быть пустым")
+                    .Must(email => string.IsNullOrEmpty(email) || email.Length <= 256).WithMessage("Email не должен превышать 256 символов");
 
                 RuleFor(u => u.Login)
                     .MustAsync((login, token) => userRepository.CheckIsLoginUniqueAsync(login, token))

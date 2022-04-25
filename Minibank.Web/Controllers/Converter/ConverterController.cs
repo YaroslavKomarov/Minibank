@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Minibank.Core.Services;
+﻿using Minibank.Core.Domain.Currency.Services;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Threading;
 
