@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Minibank.Core.Tests": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

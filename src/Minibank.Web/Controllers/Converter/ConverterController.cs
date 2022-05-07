@@ -1,4 +1,5 @@
 ﻿using Minibank.Core.Domain.Currency.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Threading;
@@ -6,6 +7,7 @@ using System.Threading;
 namespace Minibank.Web.Controllers.Converter
 {
     [ApiController]
+    [Authorize]
     [Route("api/v1/minibank/[controller]/[action]")]
     public class ConverterController : ControllerBase
     {
