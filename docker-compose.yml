@@ -6,7 +6,7 @@ services:
         image: postgres:14
         restart: always
         ports:
-            - "5432:5432"
+            - "5432"
         environment:
             POSTGRES_DB: minibank-db
             POSTGRES_USER: postgres
@@ -28,7 +28,6 @@ services:
             storage:
                 condition: service_healthy
         ports: 
-            - "5000:5000"
-            - "5001:5001"
+            - "8000:80"
         environment:
-            DataBase__ConnectionString: Host=storage;Port=5432;Database=minibank-db;Username=postgres;Password=5788
+            DB_CONNECTION_STRING: "Host=storage;Port=5432;Database=minibank-db;Username=postgres;Password=5788"

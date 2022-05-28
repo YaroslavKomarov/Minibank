@@ -18,6 +18,8 @@ namespace Minibank.Data
     {
         public static IServiceCollection AddData(this IServiceCollection services, IConfiguration configuration)
         {
+            //var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
             services.AddHttpClient<ICurrencyRateService, CurrencyRateService>(options =>
             {
                 options.BaseAddress = new Uri(configuration["CbrCurrenciesUri"]);
