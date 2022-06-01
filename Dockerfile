@@ -18,7 +18,7 @@ WORKDIR /app
 # Copy from src image to final image
 COPY --from=src /dist .
 # Declare environment variables
-ENV ASPNETCORE_URLS=http://localhost:5001;http://localhost:5000;
-EXPOSE 5000 5001
+# ENV ASPNETCORE_URLS=http://localhost:5001;http://localhost:5000;
+# EXPOSE 5000 5001
 # Start the application
 ENTRYPOINT ["dotnet", "Minibank.Web.dll"]
